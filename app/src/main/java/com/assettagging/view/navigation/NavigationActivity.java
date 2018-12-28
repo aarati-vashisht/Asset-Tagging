@@ -127,6 +127,7 @@ public class NavigationActivity extends BaseActivity
         }
 
         onRefreshListener();
+        /////////////////////////////
     }
 
     public void getDataFromDatabase() {
