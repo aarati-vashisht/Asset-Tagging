@@ -104,20 +104,18 @@ public class LoginActivity extends BaseActivity implements CustomViews {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         if (Preferance.getTheme(this).equals("ORANGE")) {
-            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background));
+            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background,null));
+            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background,null));
+            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background,null));
+            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background,null));
             linearLayoutBackground.setBackgroundResource(R.mipmap.background);
         } else if (Preferance.getTheme(this).equals("BLUE")) {
-            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue,null));
+            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue,null));
+            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue,null));
+            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
             linearLayoutBackground.setBackgroundResource(R.mipmap.background_blue);
         }
-
-
         dbHelper = new DataBaseHelper(this);
 
         overridePendingTransition(0, 0);
@@ -167,19 +165,23 @@ public class LoginActivity extends BaseActivity implements CustomViews {
         Gson gson = new Gson();
         Type userType = new TypeToken<List<ActvityCount>>() {
         }.getType();
-        if (allData.getUserList() != null && allData != null) {
-            allData.getOngoingSchedule().clear();
-            allData.getUpcomingSchedule().clear();
-            String UserListJson = gson.toJson(allData.getUserList(), userType);
-            Preferance.setUserList(this, UserListJson);
-            ///Save AllData
-            String AllDataJson = gson.toJson(allData);
-            Preferance.saveAllDAta(LoginActivity.this, AllDataJson);
-            for (int i = 0; i < allData.getUserList().size(); i++) {
-                getScheduleData(allData.getUserList().get(i).getUserId());
+        if (allData != null)
+            if (allData.getUserList() != null) {
+                allData.getOngoingSchedule().clear();
+                allData.getUpcomingSchedule().clear();
+                String UserListJson = gson.toJson(allData.getUserList(), userType);
+                Preferance.setUserList(this, UserListJson);
+                ///Save AllData
+                String AllDataJson = gson.toJson(allData);
+                Preferance.saveAllDAta(LoginActivity.this, AllDataJson);
+//            for (int i = 0; i < allData.getUserList().size(); i++) {
+//                getScheduleData(allData.getUserList().get(i).getUserId());
+//            }
+            } else {
+                CustomToast.showToast(this, getResources().getString(R.string.datasavedsuccessfully));
             }
-        } else {
-            CustomToast.showToast(this, getResources().getString(R.string.datasavedsuccessfully));
+        else {
+            CustomToast.showToast(this, getResources().getString(R.string.something_bad_happened));
         }
 
     }
@@ -202,11 +204,12 @@ public class LoginActivity extends BaseActivity implements CustomViews {
 
     private void setScheduleResponse(ScheduleData body, String userId) {
         if (body != null) {
-            for (int i = 0; i < allData.getOngoingSchedule().size(); i++) {
-                body.getOngoingSchedule().get(i).setEmpId(userId);
-            } for (int i = 0; i < allData.getUpcomingSchedule().size(); i++) {
-                body.getUpcomingSchedule().get(i).setEmpId(userId);
-            }
+//            for (int i = 0; i < allData.getOngoingSchedule().size(); i++) {
+//                body.getOngoingSchedule().get(i).setEmpId(userId);
+//            }
+//            for (int i = 0; i < allData.getUpcomingSchedule().size(); i++) {
+//                body.getUpcomingSchedule().get(i).setEmpId(userId);
+//            }
             allData.setOngoingSchedule(body.getOngoingSchedule());
             allData.setUpcomingSchedule(body.getUpcomingSchedule());
         }
@@ -292,7 +295,6 @@ public class LoginActivity extends BaseActivity implements CustomViews {
 
             }
         });
-
 
     }
 

@@ -61,12 +61,12 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
 //        holder.textViewStartTime.setText(locationWiseTasks.get(position).getSTARTTIME());
 //        holder.textViewEndTime.setText(locationWiseTasks.get(position).getSTARTTIME());
         if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("Inspection")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection,null));
         }else if(locationWiseTasks.get(position).getACTIVITYTYPE().equals("tagging")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon,null));
             holder.textViewActivityType.setText("Tagging");
         } else {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement,null));
         }
         holder.linearLayoutRow.setOnClickListener(new View.OnClickListener() {
             @Override

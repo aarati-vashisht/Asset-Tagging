@@ -312,16 +312,16 @@ public class TaskWiseActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override

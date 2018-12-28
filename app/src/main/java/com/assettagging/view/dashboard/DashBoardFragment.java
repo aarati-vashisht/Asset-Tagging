@@ -104,32 +104,6 @@ public class DashBoardFragment extends Fragment {
         linearLayoutDisposer.setBackgroundColor(color);
     }
 
-    private void getAllData() {
-        Call<AllData> call = MyApplication.apiInterface.getAllData();
-        call.enqueue(new Callback<AllData>() {
-            @Override
-            public void onResponse(Call<AllData> call, Response<AllData> response) {
-                try {
-                    setAllDataResponse(response.body());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //  progressBar2.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onFailure(Call<AllData> call, Throwable t) {
-                //  progressBar2.setVisibility(View.GONE);
-
-                try {
-                    setAllDataResponse(null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 
     private void setAllDataResponse(AllData body) throws IOException {
         if (body == null) {
@@ -208,9 +182,9 @@ public class DashBoardFragment extends Fragment {
             if (scheduleData.getActvityCount().get(0).getDisposalSubmitCount() == null) {
                 scheduleData.getActvityCount().get(0).setDisposalSubmitCount("0");
             }
-            DataBaseHelper dataBaseHelper = new DataBaseHelper(getActivity().getApplicationContext());
+            DataBaseHelper dataBaseHelper = new DataBaseHelper(getActivity());
             List<CreatedDisposalList> schedules = new ArrayList<>();
-            schedules.addAll(dataBaseHelper.getAllDisposedSchedule());
+           // schedules.addAll(dataBaseHelper.getAllDisposedSchedule());
             textViewCompleted.setText(scheduleData.getCompSchedule().size() + "");
             textViewOngoing.setText(scheduleData.getOngoingSchedule().size() + "");
             textViewUpcoming.setText(scheduleData.getUpcomingSchedule().size() + "");

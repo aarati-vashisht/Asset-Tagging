@@ -199,29 +199,6 @@ public class ScheduleDetailActivity extends BaseActivity {
     }
 
     public void editTextBarCodeChangeListener() {
-//        editTextBarCode.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (!hasFocus) {
-//                    if (!editTextBarCode.getText().toString().trim().equals("")) {
-//                        scheduleDetailAdapter.filter(editTextBarCode.getText().toString());
-//                        mhandler = new Handler();
-//                        mhandler.postDelayed(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                editTextBarCode.setText("");
-//                                editTextBarCode.requestFocus();
-//                                if (mhandler != null) {
-//                                    mhandler.removeCallbacksAndMessages(null);
-//                                    mhandler = null;
-//
-//
-//                                }
-//                            }
-//                        }, 2000);
-//                    }  }
-//            }
-//        });
 
         editTextBarCode.addTextChangedListener(new TextWatcher() {
             @Override
@@ -329,7 +306,6 @@ public class ScheduleDetailActivity extends BaseActivity {
             handler.removeCallbacksAndMessages(null);
             handler = null;
         }
-        //ScheduleDetailActivity.scheduleDetailAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -398,11 +374,11 @@ public class ScheduleDetailActivity extends BaseActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (Preferance.getTheme(this).equals("ORANGE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background,null));
         } else if (Preferance.getTheme(this).equals("BLUE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
         }
     }
 
@@ -468,16 +444,16 @@ public class ScheduleDetailActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -545,7 +521,6 @@ public class ScheduleDetailActivity extends BaseActivity {
 
 
     public void onSubmitButtonClick(View view) throws IOException {
-        //  if (!editTextBarCode.getText().toString().trim().equals("")) {
         if (ScannedList != null) {
             if (ScannedList.size() > 0) {
                 String newString = ScannedList.toString().replace("\"", "\'");

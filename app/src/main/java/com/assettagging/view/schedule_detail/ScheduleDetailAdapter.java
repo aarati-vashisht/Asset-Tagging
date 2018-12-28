@@ -191,9 +191,9 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             super(view);
             ButterKnife.bind(this, view);
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background,null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue,null));
             }
         }
 
@@ -581,9 +581,9 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             radioGroupItems = dialogInspection.findViewById(R.id.radioGroupItems);
 
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background));
+                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background,null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background_blue));
+                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background_blue,null));
 
             }
             for (int i = 0; i < ITEM.size(); i++) {

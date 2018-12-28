@@ -140,7 +140,6 @@ public class BindLocationDisposalActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable arg0) {
-                // TODO Auto-generated method stub
                 String text = edtname.getText().toString().toLowerCase(Locale.getDefault());
                 adapter.filter(text);
             }
@@ -148,13 +147,11 @@ public class BindLocationDisposalActivity extends BaseActivity {
             @Override
             public void beforeTextChanged(CharSequence arg0, int arg1,
                                           int arg2, int arg3) {
-                // TODO Auto-generated method stub
             }
 
             @Override
             public void onTextChanged(CharSequence arg0, int arg1, int arg2,
                                       int arg3) {
-                // TODO Auto-generated method stub
             }
         });
         dialog.show();

@@ -28,10 +28,8 @@ public class APIClient {
     public static final String ipaddressPrefrence = "IPAddress Prefrence";
     private static String BaseUrl = "http://192.168.200.199:804/service1.svc/";
     //  private static String BaseUrl = "http://180.179.221.43:8096/service1.svc/";
+    //  private static String BaseUrl = "http://180.179.221.43:8096/service1.svc/";
     private static OkHttpClient client;
-
-
-
 
     public static Retrofit getClient() {
         Log.d("BaseUrl",BaseUrl);
@@ -40,8 +38,9 @@ public class APIClient {
         if (client != null) {
             client = null;
         }
-        client = new OkHttpClient.Builder().addInterceptor(interceptor).readTimeout(2, TimeUnit.MINUTES)
-                .connectTimeout(30, TimeUnit.MINUTES).build();
+        OkHttpClient.Builder okHttpClient = new OkHttpClient.Builder();
+        client = okHttpClient.addInterceptor(interceptor).readTimeout(2, TimeUnit.MINUTES)
+                .connectTimeout(2, TimeUnit.MINUTES).build();
         if (retrofit != null) {
             retrofit = null;
         }

@@ -49,14 +49,11 @@ public class SplashActivity extends BaseActivity {
     private DataBaseHelper dbHelper;
 
     @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
-
-
-
 
         dbHelper = new DataBaseHelper(this);
         ButterKnife.bind(this);
@@ -69,20 +66,10 @@ public class SplashActivity extends BaseActivity {
         if (CheckInternetConnection.isInternetConnected(getApplicationContext())) {
             progressBar.setVisibility(View.GONE);
             progressBar2.setVisibility(View.VISIBLE);
-            if (Preferance.getTheme(this).equals("ORANGE")) {
-                progressBar2.setProgressDrawable(getResources().getDrawable(R.drawable.cutom_progress_drawable));
-            } else if (Preferance.getTheme(this).equals("BLUE")) {
-                progressBar2.setProgressDrawable(getResources().getDrawable(R.drawable.cutom_progress_drawable_blue));
-            }
             doSplashWork();
         } else {
             progressBar.setVisibility(View.VISIBLE);
             progressBar2.setVisibility(View.GONE);
-            if (Preferance.getTheme(this).equals("ORANGE")) {
-                progressBar.setProgressDrawable(getResources().getDrawable(R.drawable.cutom_progress_drawable));
-            } else if (Preferance.getTheme(this).equals("BLUE")) {
-                progressBar.setProgressDrawable(getResources().getDrawable(R.drawable.cutom_progress_drawable_blue));
-            }
             doAnimation();
         }
 
@@ -158,7 +145,6 @@ public class SplashActivity extends BaseActivity {
 
 
     private void doAnimation() {
-
         progressBar.setProgress(i);
         cdt = new CountDownTimer(2800, 26) {
 

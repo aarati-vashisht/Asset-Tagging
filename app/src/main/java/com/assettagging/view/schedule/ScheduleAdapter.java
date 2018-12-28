@@ -55,9 +55,9 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.MyView
             super(view);
             ButterKnife.bind(this, view);
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background,null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue,null));
             }
 
         }
