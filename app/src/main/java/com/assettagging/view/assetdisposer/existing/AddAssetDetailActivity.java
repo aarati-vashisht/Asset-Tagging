@@ -1,4 +1,4 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.existing;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,23 +27,29 @@ import com.assettagging.R;
 import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.controller.Constants;
 import com.assettagging.controller.DataBaseHelper;
+import com.assettagging.model.all_data.AllData;
+import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.asset_detai.AssetData;
 import com.assettagging.model.asset_detai.BarcodeWiseDataList;
 import com.assettagging.model.asset_detai.DisposalAssetData;
 import com.assettagging.model.asset_detai.SaveAssets;
+import com.assettagging.model.asset_detai.SaveAssetsOffline;
 import com.assettagging.model.asset_detai.SaveDisposalTrack;
 import com.assettagging.model.asset_detai.UserAssets;
-import com.assettagging.model.asset_disposal.DisposalWiseDataList;
 import com.assettagging.model.asset_disposal.UserDisposalSchedule;
 import com.assettagging.model.login.ChangePassword;
 import com.assettagging.model.login.UserChangePass;
 import com.assettagging.preference.Preferance;
 import com.assettagging.view.BaseActivity;
 import com.assettagging.view.AddAssetLocation.BindLocationDisposalActivity;
+import com.assettagging.view.assetdisposer.yet_to_submit.DisposalAssetsAdapter;
+import com.assettagging.view.assetdisposer.DisposerFragmnet;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerFragment;
 import com.assettagging.view.custom_control.CustomDialogForMessages;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.custom_control.CustomToast;
 import com.assettagging.view.login.LoginActivity;
+import com.assettagging.view.navigation.NavigationActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -79,7 +85,7 @@ public class AddAssetDetailActivity extends BaseActivity {
     private JsonArray ScannedList;
     private String Type;
     private MenuItem addMenu;
-    private List<DisposalWiseDataList> disposalAssets = new ArrayList<>();
+    private List<disposalassetlist> disposalAssets = new ArrayList<>();
     private static AddAssetDetailActivity instance;
 
     @Override
@@ -97,10 +103,33 @@ public class AddAssetDetailActivity extends BaseActivity {
         if (DisposerFragmnet.position == 0) {
             setAdapter(dataBaseHelper.getParticularDisposalAssets(SCHEDULE_ID));
         } else {
-            getData();
+            if (CheckInternetConnection.isInternetConnected(AddAssetDetailActivity.this)) {
+                getData();
+            } else {
+                getDataOffline();
+            }
         }
+        if (CheckInternetConnection.isInternetConnected(AddAssetDetailActivity.this)) {
+            editTextBarCode.setVisibility(View.VISIBLE);
+        } else {
+            editTextBarCode.setVisibility(View.GONE);
+        }
+        if (DisposerFragmnet.position == 0) {
+            editTextBarCode.setVisibility(View.VISIBLE);
+        } else {
+            editTextBarCode.setVisibility(View.GONE);
+        }
+        NavigationActivity.getInstance().action_LoadMore.setVisible(false);
         onRefreshListener();
     }
+
+    private void getDataOffline() {
+        Gson gson = new Gson();
+        String json = Preferance.getAllDAta(this);
+        AllData allData = gson.fromJson(json, AllData.class);
+        setAdapter(allData.getListGetAssetAssetGruopwise());
+    }
+
     private void onRefreshListener() {
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -118,6 +147,7 @@ public class AddAssetDetailActivity extends BaseActivity {
             }
         });
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -204,7 +234,8 @@ public class AddAssetDetailActivity extends BaseActivity {
                 return true;
             case R.id.action_logout:
                 Preferance.clearPreference(this);
-                dataBaseHelper.dropAssetandDisposalTable(); dataBaseHelper.dropTable();
+                dataBaseHelper.dropAssetandDisposalTable();
+                dataBaseHelper.dropTable();
                 finish();
                 startActivity(new Intent(this, LoginActivity.class));
                 overridePendingTransition(0, 0);
@@ -238,16 +269,16 @@ public class AddAssetDetailActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background, null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -391,7 +422,7 @@ public class AddAssetDetailActivity extends BaseActivity {
         }
     }
 
-    public void setAdapter(List<DisposalWiseDataList> disposalAssetsList) {
+    public void setAdapter(List<disposalassetlist> disposalAssetsList) {
         if (disposalAssetsList.size() > 0) {
             disposalAssets.clear();
             disposalAssets.addAll(disposalAssetsList);
@@ -404,8 +435,8 @@ public class AddAssetDetailActivity extends BaseActivity {
             }
 
 
-            ArrayList<DisposalWiseDataList> values = new ArrayList<DisposalWiseDataList>();
-            HashSet<DisposalWiseDataList> hashSet = new HashSet<DisposalWiseDataList>();
+            ArrayList<disposalassetlist> values = new ArrayList<disposalassetlist>();
+            HashSet<disposalassetlist> hashSet = new HashSet<disposalassetlist>();
             hashSet.addAll(disposalAssetsList);
             values.clear();
             values.addAll(hashSet);
@@ -443,11 +474,11 @@ public class AddAssetDetailActivity extends BaseActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (Preferance.getTheme(this).equals("ORANGE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background,null));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background, null));
         } else if (Preferance.getTheme(this).equals("BLUE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
         }
 
     }
@@ -471,35 +502,59 @@ public class AddAssetDetailActivity extends BaseActivity {
                 Gson gson = new GsonBuilder().create();
                 JsonArray myCustomArray = gson.toJsonTree(disposalAssets).getAsJsonArray();
                 ScannedList = myCustomArray;
+
+
                 if (ScannedList != null) {
                     if (ScannedList.size() > 0) {
                         String newString = ScannedList.toString().replace("\"", "\'");
                         String userId = Preferance.getUserId(AddAssetDetailActivity.this);
-                        CustomProgress.startProgress(AddAssetDetailActivity.this);
-                        SaveAssets saveAssets = new SaveAssets(userId, SCHEDULE_NAME, DISPOSAL_DATE, newString, Type);
-                        Call<SaveDisposalTrack> call = MyApplication.apiInterface.getSaveDisposalTracking(saveAssets);
-                        call.enqueue(new Callback<SaveDisposalTrack>() {
-                            @Override
-                            public void onResponse(Call<SaveDisposalTrack> call, Response<SaveDisposalTrack> response) {
-                                CustomProgress.endProgress();
-                                if (response.body().getMessage().contains("Asset Already Exist")) {
-                                    CustomToast.showToast(AddAssetDetailActivity.this, response.body().getMessage());
-                                } else {
-                                    dataBaseHelper.dropASSETSTable(AddAssetDetailActivity.this, SCHEDULE_ID);
-                                    dataBaseHelper.dropDisposerTable(AddAssetDetailActivity.this, SCHEDULE_ID);
-                                    YetToSubmitDisposerFragment.getInstance().setAdapter(dataBaseHelper.getAllDisposedSchedule());
-                                    if (CreatedAssetsFragment.getInstance() != null) {
-                                        CreatedAssetsFragment.getInstance().getAssetDisposalData();
-                                    }
-                                    finish();
-                                }
-                            }
+                        if (CheckInternetConnection.isInternetConnected(AddAssetDetailActivity.this)) {
+                            CustomProgress.startProgress(AddAssetDetailActivity.this);
+                            SaveAssets saveAssets = new SaveAssets(userId, SCHEDULE_NAME, DISPOSAL_DATE, newString, Type);
+                            Call<SaveDisposalTrack> call = MyApplication.apiInterface.getSaveDisposalTracking(saveAssets);
+                            call.enqueue(new Callback<SaveDisposalTrack>() {
+                                @Override
+                                public void onResponse(Call<SaveDisposalTrack> call, Response<SaveDisposalTrack> response) {
+                                    CustomProgress.endProgress();
+                                    if (response.body().getMessage().contains("Asset Already Exist")) {
+                                        CustomToast.showToast(AddAssetDetailActivity.this, response.body().getMessage());
+                                    } else {
+                                        dataBaseHelper.dropASSETSTable(AddAssetDetailActivity.this, SCHEDULE_ID);
+                                        dataBaseHelper.dropDisposerTable(AddAssetDetailActivity.this, SCHEDULE_ID);
+                                        YetToSubmitDisposerFragment.getInstance().setAdapter(dataBaseHelper.getAllDisposedSchedule());
+                                        if (ExistingAssetsFragment.getInstance() != null) {
+                                            ExistingAssetsFragment.getInstance().getAssetDisposalData();
+                                        }
+                                        DisposerFragmnet.position = 1;
+                                        finish();
 
-                            @Override
-                            public void onFailure(Call<SaveDisposalTrack> call, Throwable t) {
-                                CustomProgress.endProgress();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<SaveDisposalTrack> call, Throwable t) {
+                                    CustomProgress.endProgress();
+                                }
+                            });
+                        } else {
+                            List<SaveAssetsOffline> saveAssetsList = new ArrayList<>();
+                            SaveAssetsOffline saveAssets = new SaveAssetsOffline();
+                            saveAssets.setScheduleID(SCHEDULE_ID);
+                            saveAssets.setDisposalDate(DISPOSAL_DATE);
+                            saveAssets.setScheduleName(SCHEDULE_NAME);
+                            saveAssets.setScannedList(newString);
+                            saveAssets.setType(Type);
+                            saveAssetsList.add(saveAssets);
+                            String saveAssetsJson = new Gson().toJson(saveAssetsList);
+                            Preferance.saveAddDisposalAssetslist(AddAssetDetailActivity.this, saveAssetsJson);
+                            dataBaseHelper.dropASSETSTable(AddAssetDetailActivity.this, SCHEDULE_ID);
+                            dataBaseHelper.dropDisposerTable(AddAssetDetailActivity.this, SCHEDULE_ID);
+                            YetToSubmitDisposerFragment.getInstance().setAdapter(dataBaseHelper.getAllDisposedSchedule());
+                            if (ExistingAssetsFragment.getInstance() != null) {
+                                ExistingAssetsFragment.getInstance().getAssetDisposalData();
                             }
-                        });
+                            finish();
+                        }
 
 
                     } else {

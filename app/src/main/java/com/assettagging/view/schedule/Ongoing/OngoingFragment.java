@@ -63,14 +63,20 @@ public class OngoingFragment extends Fragment {
 
     public void setAdapter(List<Schedule> onGoingSchedule) {
         if (NavigationActivity.getInstance().scheduleData != null) {
-            recyclerViewSchedule.setVisibility(View.VISIBLE);
-            textViewNoSchedule.setVisibility(View.GONE);
-            scheduleAdapter = new ScheduleAdapter(activity, NavigationActivity.getInstance().scheduleData.getOngoingSchedule());
-            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
-            recyclerViewSchedule.setLayoutManager(mLayoutManager);
-            recyclerViewSchedule.setItemAnimator(new DefaultItemAnimator());
-            recyclerViewSchedule.setAdapter(scheduleAdapter);
-            scheduleAdapter.notifyDataSetChanged();
+            if (onGoingSchedule.size() > 0) {
+                recyclerViewSchedule.setVisibility(View.VISIBLE);
+                textViewNoSchedule.setVisibility(View.GONE);
+                scheduleAdapter = new ScheduleAdapter(activity, NavigationActivity.getInstance().scheduleData.getOngoingSchedule());
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
+                recyclerViewSchedule.setLayoutManager(mLayoutManager);
+                recyclerViewSchedule.setItemAnimator(new DefaultItemAnimator());
+                recyclerViewSchedule.setAdapter(scheduleAdapter);
+                scheduleAdapter.notifyDataSetChanged();
+            } else {
+                recyclerViewSchedule.setVisibility(View.GONE);
+                textViewNoSchedule.setVisibility(View.VISIBLE);
+            }
+
         } else {
             if (onGoingSchedule.size() > 0) {
                 recyclerViewSchedule.setVisibility(View.VISIBLE);

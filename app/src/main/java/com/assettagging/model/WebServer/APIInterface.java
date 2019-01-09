@@ -2,6 +2,8 @@ package com.assettagging.model.WebServer;
 
 import com.assettagging.model.Upadte_tag;
 import com.assettagging.model.all_data.AllData;
+import com.assettagging.model.all_data.GetAllData_USer;
+import com.assettagging.model.all_user.AllUSerData;
 import com.assettagging.model.assetList.assetslistModel;
 import com.assettagging.model.asset_detai.AssetData;
 import com.assettagging.model.asset_detai.DisposalAssetData;
@@ -21,7 +23,7 @@ import com.assettagging.model.login.ResetUser;
 import com.assettagging.model.login.UserChangePass;
 import com.assettagging.model.schedule.ScheduleData;
 import com.assettagging.model.schedule.UserSchedule;
-import com.assettagging.model.schedule_detail.FinacialDimension;
+import com.assettagging.model.movement_dimension.FinacialDimension;
 import com.assettagging.model.schedule_detail.SaveTracking;
 import com.assettagging.model.schedule_detail.ScheduleDetail;
 import com.assettagging.model.schedule_detail.UserScannedList;
@@ -34,7 +36,6 @@ import com.assettagging.model.user_tracking.UserAssetGroup;
 import com.assettagging.model.user_tracking.UserAssetGroupDetail;
 import com.assettagging.model.user_tracking.UserAssetGroupProjectWise;
 import com.assettagging.model.user_tracking.UserLocation;
-import com.assettagging.model.user_tracking.UserProjectLocationWise;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -44,6 +45,9 @@ public interface APIInterface {
     @POST("LoginUser")
     Call<Login> doLogin(@Body LoginUser loginUser);
 
+    @POST("GetAllUserLoginData")
+    Call<AllUSerData> getAllUser();
+
     @POST("GetScheduleData")
     Call<ScheduleData> getUserSchedule(@Body UserSchedule userSchedule);
 
@@ -52,7 +56,6 @@ public interface APIInterface {
 
     @POST("GetScheduleDetailData")
     Call<ScheduleDetail> getUserScheduleDetail(@Body UserScheduleDetail userScheduleDetail);
-
 
     @POST("BindLocation")
     Call<TrackingStatus_> getLocations(@Body UserLocation userLocation);
@@ -74,11 +77,11 @@ public interface APIInterface {
     Call<AssetData> GetBarcodeWiseData(@Body UserAssets userAssets);
 
     @POST("GetAllData")
-    Call<AllData> getAllData();
+    Call<AllData> getAllData(@Body GetAllData_USer userChangePass);
 
     @POST("SaveDisposal")
     Call<SaveDisposalTrack> getSaveDisposalTracking(@Body SaveAssets saveAssets);
-
+/////ok
     @POST("GetDisposalSchedule")
     Call<AssetDisposal> getGetDisposalSchedule(@Body UserAssetDisposal userAssetDisposal);
 
@@ -89,16 +92,16 @@ public interface APIInterface {
     @POST("UpDateTagNo")
     Call<TrackingStatus> UpDateTagNo(@Body Upadte_tag upadte_tag);
 
-    /////sent image
+    /////sent image ok
     @POST("GetDisposalScheduleDetail")
     Call<DisposalAssetData> GetDisposalScheduleDetail(@Body UserDisposalSchedule userAssetDisposal);
-
+//ok
     @POST("GetProjectLocationWise")
     Call<TrackingStatus_> GetProjectLocationWise(@Body UserAssetGroupProjectWise userProjectLocationWise);
-
+//ok
     @POST("GetAssetGroup")
     Call<TrackingStatus_> GetAssetGroup(@Body UserAssetGroup userAssetGroupProjectWise);
-
+//ok
     @POST("GetAssetAssetGruopwise")
     Call<assetslistModel> GetAssetAssetGruopwise(@Body UserAssetGroupDetail userAssetGroupProjectWise);
 

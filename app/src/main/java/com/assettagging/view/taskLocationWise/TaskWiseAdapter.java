@@ -14,6 +14,7 @@ import com.assettagging.controller.Constants;
 import com.assettagging.model.tasklocationwise.ScheduleLocationTask;
 import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
 
+import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
@@ -21,6 +22,7 @@ import butterknife.ButterKnife;
 
 public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyViewHolder> {
 
+    private final HashSet<ScheduleLocationTask> locationWiseTasksHashSet;
     private List<ScheduleLocationTask> locationWiseTasks;
     private Activity activity;
     String location;
@@ -29,7 +31,9 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
         this.locationWiseTasks = locationWiseTasks;
         this.activity = activity;
         this.location = location;
-    }
+        locationWiseTasksHashSet = new HashSet<>(this.locationWiseTasks);
+        this.locationWiseTasks.clear();
+        this.locationWiseTasks.addAll(locationWiseTasksHashSet); }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 

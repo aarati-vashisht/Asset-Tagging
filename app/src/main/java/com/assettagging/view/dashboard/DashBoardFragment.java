@@ -83,17 +83,23 @@ public class DashBoardFragment extends Fragment {
 
         }
         CustomProgress.startProgress(getActivity());
-        // setLoader();
         setdata(null);
         if (CheckInternetConnection.isInternetConnected(getContext())) {
             NavigationActivity.getInstance().getScheduleData();
-           // getAllData();
         } else {
             CustomProgress.startProgress(getActivity());
             NavigationActivity.getInstance().getDataFromDatabase();
         }
-
+        showInfo();
         return view;
+    }
+
+    private void showInfo() {
+        updatingForDynamicLocationViews();
+    }
+
+    private void updatingForDynamicLocationViews() {
+
     }
 
     private void setFragmentAccTheme(int color) {
@@ -176,20 +182,23 @@ public class DashBoardFragment extends Fragment {
                 List<Schedule> schedules = new ArrayList<>();
                 scheduleData.setCompSchedule(schedules);
             }
-            if (scheduleData.getActvityCount().get(0).getDisposalCreateCount() == null) {
+            if (scheduleData.getActvityCount() != null) {
+                if (scheduleData.getActvityCount().get(0).getDisposalCreateCount() == null) {
+                    scheduleData.getActvityCount().get(0).setDisposalCreateCount("0");
+                }
+                if (scheduleData.getActvityCount().get(0).getDisposalSubmitCount() == null) {
+                    scheduleData.getActvityCount().get(0).setDisposalSubmitCount("0");
+                }
+            } else {
                 scheduleData.getActvityCount().get(0).setDisposalCreateCount("0");
-            }
-            if (scheduleData.getActvityCount().get(0).getDisposalSubmitCount() == null) {
                 scheduleData.getActvityCount().get(0).setDisposalSubmitCount("0");
             }
-            DataBaseHelper dataBaseHelper = new DataBaseHelper(getActivity());
             List<CreatedDisposalList> schedules = new ArrayList<>();
-           // schedules.addAll(dataBaseHelper.getAllDisposedSchedule());
             textViewCompleted.setText(scheduleData.getCompSchedule().size() + "");
             textViewOngoing.setText(scheduleData.getOngoingSchedule().size() + "");
             textViewUpcoming.setText(scheduleData.getUpcomingSchedule().size() + "");
             textViewTotal.setText(Integer.parseInt(textViewCompleted.getText().toString()) + Integer.parseInt(textViewOngoing.getText().toString()) + Integer.parseInt(textViewUpcoming.getText().toString()) + "");
-            textViewAssetDisposer.setText(Integer.parseInt(scheduleData.getActvityCount().get(0).getDisposalCreateCount()) + Integer.parseInt(scheduleData.getActvityCount().get(0).getDisposalSubmitCount()) +schedules.size()+ "");
+            textViewAssetDisposer.setText(Integer.parseInt(scheduleData.getActvityCount().get(0).getDisposalCreateCount()) + Integer.parseInt(scheduleData.getActvityCount().get(0).getDisposalSubmitCount()) + schedules.size() + "");
 
             linearLayoutTotal.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -24,7 +24,9 @@ import android.widget.TextView;
 import com.assettagging.Banknameadapter;
 import com.assettagging.MyApplication;
 import com.assettagging.R;
+import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.controller.DataBaseHelper;
+import com.assettagging.model.all_data.AllData;
 import com.assettagging.model.assetList.assetslistModel;
 import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.user_tracking.Location;
@@ -35,10 +37,12 @@ import com.assettagging.model.user_tracking.UserAssetGroupProjectWise;
 import com.assettagging.model.user_tracking.UserLocation;
 import com.assettagging.preference.Preferance;
 import com.assettagging.view.BaseActivity;
-import com.assettagging.view.assetdisposer.AddAssetDetailActivity;
+import com.assettagging.view.assetdisposer.existing.AddAssetDetailActivity;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.custom_control.CustomToast;
 import com.assettagging.view.login.LoginActivity;
+import com.assettagging.view.navigation.NavigationActivity;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +77,7 @@ public class BindLocationDisposalActivity extends BaseActivity {
     private MenuItem addMenu;
     private static BindLocationDisposalActivity instance;
     private GroupWIseAssetListAdapter groupWIseAssetListAdapter;
+    private AllData allData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +87,33 @@ public class BindLocationDisposalActivity extends BaseActivity {
         instance = this;
         dataBaseHelper = new DataBaseHelper(this);
         setActionBarData();
-        getLocationData();
+        NavigationActivity.getInstance().action_LoadMore.setVisible(false);
+        if (CheckInternetConnection.isInternetConnected(this)) {
+            getLocationData();
+        } else {
+            getLocationDataOffline();
+        }
         onclickMethod();
+    }
+
+    private void getLocationDataOffline() {
+        Gson gson = new Gson();
+        String json = Preferance.getAllDAta(BindLocationDisposalActivity.this);
+        allData = gson.fromJson(json, AllData.class);
+        getLocation.clear();
+        getLocation.addAll(allData.getListBindLocationWise());
+        LocationId = getLocation.get(0).getlocation();
+        textViewLocation.setText(getLocation.get(0).getLocationNameOff());
+        if (recyclerViewData.getVisibility() == View.VISIBLE) {
+            recyclerViewData.setVisibility(View.GONE);
+            buttonSubmit.setVisibility(View.GONE);
+        }
+        textViewProject.setText("");
+        getProject.clear();
+        getAssetGroup.clear();
+        textViewAssetGroup.setText("");
+        ProjectId = "";
+        AssetGroupId = "";
     }
 
     public void banknamedialog(final List<Location> locations, final String string) {
@@ -97,33 +127,105 @@ public class BindLocationDisposalActivity extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (string.equals("Location")) {
-                    if (textViewLocation.getText().toString().trim().length() > 0) {
+                    if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                        if (textViewLocation.getText().toString().trim().length() > 0) {
+                            textViewLocation.setText("");
+                            textViewLocation.setText(locations.get(i).getName());
+                        }
+                        LocationId = locations.get(i).getId();
                         textViewLocation.setText("");
-                        textViewLocation.setText(locations.get(i).getLocationName());
-                    }
-                    LocationId = locations.get(i).getLocation();
-                    textViewLocation.setText("");
-                    textViewLocation.setText(locations.get(i).getLocationName());
-                    getProjectData(locations.get(i).getLocation());
-                } else if (string.equals("Project")) {
-                    if (textViewProject.getText().toString().trim().length() > 0) {
-                        textViewProject.setText("");
-                        textViewProject.setText(locations.get(i).getLocationName());
-                    }
-                    textViewProject.setText("");
-                    textViewProject.setText(locations.get(i).getLocationName());
-                    ProjectId = locations.get(i).getLocation();
-                    getAssetGroup(ProjectId, LocationId);
-
-                } else if (string.equals("Asset Group")) {
-                    if (textViewAssetGroup.getText().toString().trim().length() > 0) {
+                        textViewLocation.setText(locations.get(i).getName());
+                        getProjectData(locations.get(i).getId());
+                    } else {
+                        if (textViewLocation.getText().toString().trim().length() > 0) {
+                            textViewLocation.setText("");
+                            textViewLocation.setText(locations.get(i).getLocationNameOff());
+                        }
+                        LocationId = locations.get(i).getlocation();
+                        textViewLocation.setText("");
+                        textViewLocation.setText(locations.get(i).getLocationNameOff());
+                        getProject.clear();
+                        for (int j = 0; j < allData.getGetProjectLocationWise().size(); j++) {
+                            if (allData.getGetProjectLocationWise().get(j).getlocation().equals(LocationId)) {
+                                getProject.add(allData.getGetProjectLocationWise().get(j));
+                            }
+                        }
+                        ProjectId = getProject.get(0).getlocation();
+                        textViewProject.setText(getProject.get(0).getName());
+                        if (recyclerViewData.getVisibility() == View.VISIBLE) {
+                            recyclerViewData.setVisibility(View.GONE);
+                            buttonSubmit.setVisibility(View.GONE);
+                        }
+                        getAssetGroup.clear();
                         textViewAssetGroup.setText("");
-                        textViewAssetGroup.setText(locations.get(i).getLocationName());
+                        AssetGroupId = "";
                     }
-                    textViewAssetGroup.setText("");
-                    textViewAssetGroup.setText(locations.get(i).getLocationName());
-                    AssetGroupId = locations.get(i).getLocation();
-                    getAssetGroupDetailData(locations.get(i).getLocation(), LocationId, ProjectId);
+                } else if (string.equals("Project")) {
+                    if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                        if (textViewProject.getText().toString().trim().length() > 0) {
+                            textViewProject.setText("");
+                            textViewProject.setText(locations.get(i).getName());
+                        }
+                        textViewProject.setText("");
+                        textViewProject.setText(locations.get(i).getName());
+                        ProjectId = locations.get(i).getId();
+                        getAssetGroup(ProjectId, LocationId);
+                    } else {
+                        if (textViewProject.getText().toString().trim().length() > 0) {
+                            textViewProject.setText("");
+                            textViewProject.setText(locations.get(i).getName());
+                        }
+                        textViewProject.setText("");
+                        textViewProject.setText(locations.get(i).getName());
+                        ProjectId = locations.get(i).getlocation();
+                        if (allData.getListGetAssetGroup().size() == 0) {
+                            CustomToast.showToast(BindLocationDisposalActivity.this, getResources().getString(R.string.no_data_found));
+                        } else {
+                            getAssetGroup.clear();
+                            for (int j = 0; j < allData.getListGetAssetGroup().size(); j++) {
+                                if (allData.getListGetAssetGroup().get(j).getProjectId().equals(ProjectId)) {
+                                    getAssetGroup.add(allData.getListGetAssetGroup().get(j));
+                                }
+                            }
+                            textViewAssetGroup.setText(getAssetGroup.get(0).getName());
+                            AssetGroupId = getAssetGroup.get(0).getId();
+                        }
+                    }
+                } else if (string.equals("Asset Group")) {
+
+                    if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                        if (textViewAssetGroup.getText().toString().trim().length() > 0) {
+                            textViewAssetGroup.setText("");
+                            textViewAssetGroup.setText(locations.get(i).getName());
+                        }
+                        textViewAssetGroup.setText("");
+                        textViewAssetGroup.setText(locations.get(i).getName());
+                        AssetGroupId = locations.get(i).getId();
+                        getAssetGroupDetailData(locations.get(i).getId(), LocationId, ProjectId);
+                    } else {
+                        if (textViewAssetGroup.getText().toString().trim().length() > 0) {
+                            textViewAssetGroup.setText("");
+                            textViewAssetGroup.setText(locations.get(i).getName());
+                        }
+                        textViewAssetGroup.setText("");
+                        textViewAssetGroup.setText(locations.get(i).getName());
+                        AssetGroupId = locations.get(i).getId();
+
+                        recyclerViewData.setVisibility(View.VISIBLE);
+                        buttonSubmit.setVisibility(View.VISIBLE);
+                        List<disposalassetlist> ListGetDisposalScheduleDetail = new ArrayList<>();
+                        for (int j = 0; j < allData.getListGetAssetAssetGruopwise().size(); j++) {
+                            if (allData.getListGetAssetAssetGruopwise().get(j).getProjectId().equals(ProjectId) && allData.getListGetAssetAssetGruopwise().get(j).getLocation().equals(LocationId) && allData.getListGetAssetAssetGruopwise().get(j).getAssetGroup().equals(AssetGroupId)) {
+                                ListGetDisposalScheduleDetail.add(allData.getListGetAssetAssetGruopwise().get(j));
+                            }
+                        }
+                        groupWIseAssetListAdapter = new GroupWIseAssetListAdapter(BindLocationDisposalActivity.this, ListGetDisposalScheduleDetail);
+
+                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                        recyclerViewData.setLayoutManager(mLayoutManager);
+                        recyclerViewData.setItemAnimator(new DefaultItemAnimator());
+                        recyclerViewData.setAdapter(groupWIseAssetListAdapter);
+                    }
                 }
 
                 dialog.dismiss();
@@ -132,7 +234,7 @@ public class BindLocationDisposalActivity extends BaseActivity {
         });
 
         final EditText edtname = dialog.findViewById(R.id.edt_searchbankname);
-        final Banknameadapter adapter = new Banknameadapter(BindLocationDisposalActivity.this, locations);
+        final Banknameadapter adapter = new Banknameadapter(BindLocationDisposalActivity.this, locations, string);
 
         listsponser.setAdapter(adapter);
 
@@ -163,7 +265,24 @@ public class BindLocationDisposalActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (getLocation.size() == 0) {
-                    getLocationData();
+                    if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                        getLocationData();
+                    } else {
+                        getLocation.clear();
+                        getLocation.addAll(allData.getListBindLocationWise());
+                        LocationId = getLocation.get(0).getId();
+                        textViewLocation.setText(getLocation.get(0).getName());
+                        if (recyclerViewData.getVisibility() == View.VISIBLE) {
+                            recyclerViewData.setVisibility(View.GONE);
+                            buttonSubmit.setVisibility(View.GONE);
+                        }
+                        textViewProject.setText("");
+                        getProject.clear();
+                        getAssetGroup.clear();
+                        textViewAssetGroup.setText("");
+                        ProjectId = "";
+                        AssetGroupId = "";
+                    }
                 } else {
                     banknamedialog(getLocation, "Location");
                 }
@@ -173,10 +292,33 @@ public class BindLocationDisposalActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (textViewLocation.getText().toString().trim().equals("")) {
-                    CustomToast.showToast(BindLocationDisposalActivity.this, "Please select Location First");
+                    CustomToast.showToast(BindLocationDisposalActivity.this, "Please select Location_ First");
                 } else {
                     if (getProject.size() == 0) {
-                        getProjectData(LocationId);
+                        if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                            getProjectData(LocationId);
+                        } else {
+                            if (allData.getGetProjectLocationWise().size() == 0) {
+                                CustomToast.showToast(BindLocationDisposalActivity.this, getResources().getString(R.string.no_data_found));
+                            } else {
+                                getProject.clear();
+                                ///according to location
+                                for (int j = 0; j < allData.getGetProjectLocationWise().size(); j++) {
+                                    if (allData.getGetProjectLocationWise().get(j).getlocation().equals(LocationId)) {
+                                        getProject.add(allData.getGetProjectLocationWise().get(j));
+                                    }
+                                }
+                                ProjectId = allData.getGetProjectLocationWise().get(0).getId();
+                                textViewProject.setText(allData.getGetProjectLocationWise().get(0).getName());
+                                if (recyclerViewData.getVisibility() == View.VISIBLE) {
+                                    recyclerViewData.setVisibility(View.GONE);
+                                    buttonSubmit.setVisibility(View.GONE);
+                                }
+                                getAssetGroup.clear();
+                                textViewAssetGroup.setText("");
+                                AssetGroupId = "";
+                            }
+                        }
 
                     } else {
                         banknamedialog(getProject, "Project");
@@ -188,12 +330,40 @@ public class BindLocationDisposalActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (textViewLocation.getText().toString().trim().equals("")) {
-                    CustomToast.showToast(BindLocationDisposalActivity.this, "Please select Location First");
+                    CustomToast.showToast(BindLocationDisposalActivity.this, "Please select Location_ First");
                 } else if (textViewProject.getText().toString().trim().equals("")) {
                     CustomToast.showToast(BindLocationDisposalActivity.this, "Please select Project First");
                 } else {
                     if (getAssetGroup.size() == 0) {
-                        getAssetGroup(ProjectId, LocationId);
+                        if (CheckInternetConnection.isInternetConnected(BindLocationDisposalActivity.this)) {
+                            getAssetGroup(ProjectId, LocationId);
+                        } else {
+                            if (allData.getListGetAssetGroup().size() == 0) {
+                                CustomToast.showToast(BindLocationDisposalActivity.this, getResources().getString(R.string.no_data_found));
+                            } else {
+                                getAssetGroup.clear();
+                                for (int j = 0; j < allData.getListGetAssetGroup().size(); j++) {
+                                    if (allData.getListGetAssetGroup().get(j).getProjectId().equals(ProjectId) && allData.getListGetAssetGroup().get(j).getlocation().equals(LocationId)) {
+                                        getAssetGroup.add(allData.getListGetAssetGroup().get(j));
+                                    }
+                                }
+                                textViewAssetGroup.setText(getAssetGroup.get(0).getName());
+                                AssetGroupId = getAssetGroup.get(0).getId();
+                                recyclerViewData.setVisibility(View.VISIBLE);
+                                buttonSubmit.setVisibility(View.VISIBLE);
+                                List<disposalassetlist> ListGetDisposalScheduleDetail = new ArrayList<>();
+                                for (int j = 0; j < allData.getListGetAssetAssetGruopwise().size(); j++) {
+                                    if (allData.getListGetAssetAssetGruopwise().get(j).getProjectId().equals(ProjectId) && allData.getListGetAssetAssetGruopwise().get(j).getLocation().equals(LocationId) && allData.getListGetAssetAssetGruopwise().get(j).getAssetGroup().equals(AssetGroupId)) {
+                                        ListGetDisposalScheduleDetail.add(allData.getListGetAssetAssetGruopwise().get(j));
+                                    }
+                                }
+                                groupWIseAssetListAdapter = new GroupWIseAssetListAdapter(BindLocationDisposalActivity.this, ListGetDisposalScheduleDetail);
+                                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                                recyclerViewData.setLayoutManager(mLayoutManager);
+                                recyclerViewData.setItemAnimator(new DefaultItemAnimator());
+                                recyclerViewData.setAdapter(groupWIseAssetListAdapter);
+                            }
+                        }
                     } else {
                         banknamedialog(getAssetGroup, "Asset Group");
                     }
@@ -260,8 +430,8 @@ public class BindLocationDisposalActivity extends BaseActivity {
             public void onResponse(Call<TrackingStatus_> call, Response<TrackingStatus_> response) {
                 getLocation.clear();
                 getLocation.addAll(response.body().getLocation());
-                LocationId = getLocation.get(0).getLocation();
-                textViewLocation.setText(getLocation.get(0).getLocationName());
+                LocationId = getLocation.get(0).getId();
+                textViewLocation.setText(getLocation.get(0).getName());
                 if (recyclerViewData.getVisibility() == View.VISIBLE) {
                     recyclerViewData.setVisibility(View.GONE);
                     buttonSubmit.setVisibility(View.GONE);
@@ -296,9 +466,9 @@ public class BindLocationDisposalActivity extends BaseActivity {
     String LocationId, ProjectId, AssetGroupId = "";
 
     private void insertDataInDataBase(final List<Location> response) {
-        CustomToast.showToast(this, response.get(0).getLocationName());
-        textViewLocation.setText(response.get(0).getLocationName());
-        // getProjectData(response.body().getLocation().get(0).getLocation());
+        CustomToast.showToast(this, response.get(0).getName());
+        textViewLocation.setText(response.get(0).getName());
+        // getProjectData(response.body().getId().get(0).getId());
 
 
     }
@@ -308,9 +478,9 @@ public class BindLocationDisposalActivity extends BaseActivity {
 //        if (textViewLocation.getText().toString().equals("")) {
 //            CustomToast.showToast(this, "Please select Project");
 //        } else if (textViewProject.getText().toString().equals("")) {
-//            CustomToast.showToast(this, "Please select Location");
+//            CustomToast.showToast(this, "Please select Location_");
 //        } else {
-//            getAssetGroup(location.get(i).getLocation());
+//            getAssetGroup(location.get(i).getId());
 //        }
     }
 
@@ -340,7 +510,7 @@ public class BindLocationDisposalActivity extends BaseActivity {
     private void getAssetGroupDetailData(String assetgroupId, String locationId, String projectId) {
         final String userId = Preferance.getUserId(this);
         CustomProgress.startProgress(this);
-        Call<assetslistModel> call = MyApplication.apiInterface.GetAssetAssetGruopwise(new UserAssetGroupDetail(userId, assetgroupId,projectId,locationId));
+        Call<assetslistModel> call = MyApplication.apiInterface.GetAssetAssetGruopwise(new UserAssetGroupDetail(userId, assetgroupId, projectId, locationId));
 
         call.enqueue(new Callback<assetslistModel>() {
             @Override
@@ -367,8 +537,8 @@ public class BindLocationDisposalActivity extends BaseActivity {
                 } else {
                     getAssetGroup.clear();
                     getAssetGroup.addAll(response.body().getLocation());
-                    textViewAssetGroup.setText(response.body().getLocation().get(0).getLocationName());
-                    AssetGroupId = response.body().getLocation().get(0).getLocation();
+                    textViewAssetGroup.setText(response.body().getLocation().get(0).getName());
+                    AssetGroupId = response.body().getLocation().get(0).getId();
                     getAssetGroupDetailData(AssetGroupId, LocationId, ProjectId);
                 }
             } else {
@@ -385,7 +555,7 @@ public class BindLocationDisposalActivity extends BaseActivity {
     }
 
     private void callServiceforAssetDetail() {
-        //  getAssetGroupDetailData(location.get(i).getLocation());
+        //  getAssetGroupDetailData(location.get(i).getId());
     }
 
     private void setAssetGroupDetailResponse(final Response<assetslistModel> response) {
@@ -393,9 +563,15 @@ public class BindLocationDisposalActivity extends BaseActivity {
             CustomToast.showToast(this, getResources().getString(R.string.something_bad_happened));
         } else {
             if (response.body().getStatus().equals("success")) {
-                recyclerViewData.setVisibility(View.VISIBLE);
-                buttonSubmit.setVisibility(View.VISIBLE);
-                setAdapter(response.body().getDisposalAssetList());
+                if (response.body().getDisposalAssetList().size() == 0) {
+                    recyclerViewData.setVisibility(View.GONE);
+                    buttonSubmit.setVisibility(View.GONE);
+                    CustomToast.showToast(this, response.body().getMessage());
+                } else {
+                    recyclerViewData.setVisibility(View.VISIBLE);
+                    buttonSubmit.setVisibility(View.VISIBLE);
+                    setAdapter(response.body().getDisposalAssetList());
+                }
             } else {
                 buttonSubmit.setVisibility(View.GONE);
                 recyclerViewData.setVisibility(View.GONE);
@@ -452,8 +628,8 @@ public class BindLocationDisposalActivity extends BaseActivity {
                 } else {
                     getProject.clear();
                     getProject.addAll(response.body().getLocation());
-                    ProjectId = response.body().getLocation().get(0).getLocation();
-                    textViewProject.setText(response.body().getLocation().get(0).getLocationName());
+                    ProjectId = response.body().getLocation().get(0).getId();
+                    textViewProject.setText(response.body().getLocation().get(0).getName());
                     if (recyclerViewData.getVisibility() == View.VISIBLE) {
                         recyclerViewData.setVisibility(View.GONE);
                         buttonSubmit.setVisibility(View.GONE);

@@ -14,10 +14,11 @@ import com.assettagging.R;
 import com.assettagging.controller.Constants;
 import com.assettagging.model.schedule.Schedule;
 import com.assettagging.preference.Preferance;
-import com.assettagging.view.assetdisposer.AddAssetDetailActivity;
 import com.assettagging.view.locationwise.LocationWiseActivity;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,11 +28,14 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.MyView
     private List<Schedule> scheduleList;
     private Activity activity;
     String disposal;
+    Set<Schedule> schedulesSet;
 
     public ScheduleAdapter(Activity activity, List<Schedule> scheduleList) {
         this.scheduleList = scheduleList;
         this.activity = activity;
-
+        schedulesSet = new HashSet<>(this.scheduleList);
+        this.scheduleList.clear();
+        this.scheduleList.addAll(schedulesSet);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -55,9 +59,9 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.MyView
             super(view);
             ButterKnife.bind(this, view);
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background,null));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background, null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue,null));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue, null));
             }
 
         }
@@ -69,8 +73,8 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.MyView
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
 
-            itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.schedule_list_row, parent, false);
+        itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.schedule_list_row, parent, false);
 
         return new MyViewHolder(itemView);
     }
@@ -87,8 +91,8 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.MyView
             @Override
             public void onClick(View view) {
 
-                    activity.startActivity(new Intent(activity, LocationWiseActivity.class).putExtra(Constants.SCHEDULE_ID, scheduleList.get(position).getSCHEDULEID()).putExtra(Constants.EmpID, Preferance.getEmpId(activity)));
-                    activity.overridePendingTransition(0, 0);
+                activity.startActivity(new Intent(activity, LocationWiseActivity.class).putExtra(Constants.SCHEDULE_ID, scheduleList.get(position).getSCHEDULEID()).putExtra(Constants.EmpID, Preferance.getEmpId(activity)));
+                activity.overridePendingTransition(0, 0);
 
             }
         });

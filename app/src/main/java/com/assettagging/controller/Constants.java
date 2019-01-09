@@ -21,4 +21,5 @@ public class Constants {
     public static String USER_ID="USER_ID";
     public static String ID="ID";
     public static String NAME="NAME";
+    public static String LOCATION_Name="LOCATION_Name";
 }

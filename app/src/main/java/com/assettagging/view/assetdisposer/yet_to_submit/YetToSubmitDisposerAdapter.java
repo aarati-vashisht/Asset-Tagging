@@ -1,4 +1,4 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.yet_to_submit;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,11 +14,13 @@ import com.assettagging.R;
 import com.assettagging.controller.Constants;
 import com.assettagging.model.asset_disposal.CreatedDisposalList;
 import com.assettagging.preference.Preferance;
+import com.assettagging.view.assetdisposer.existing.AddAssetDetailActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
@@ -26,6 +28,7 @@ import butterknife.ButterKnife;
 
 public class YetToSubmitDisposerAdapter extends RecyclerView.Adapter<YetToSubmitDisposerAdapter.MyViewHolder> {
 
+    private final HashSet<CreatedDisposalList> scheduleListHashSet;
     private List<CreatedDisposalList> scheduleList;
     private Activity activity;
     String disposal;
@@ -34,7 +37,9 @@ public class YetToSubmitDisposerAdapter extends RecyclerView.Adapter<YetToSubmit
     public YetToSubmitDisposerAdapter(Activity activity, List<CreatedDisposalList> scheduleList) {
         this.scheduleList = scheduleList;
         this.activity = activity;
-
+        scheduleListHashSet = new HashSet<>(this.scheduleList);
+        this.scheduleList.clear();
+        this.scheduleList.addAll(scheduleListHashSet);
     }
 
     public void sortList() {
@@ -112,7 +117,7 @@ public class YetToSubmitDisposerAdapter extends RecyclerView.Adapter<YetToSubmit
             @Override
             public void onClick(View view) {
                 int i=position;
-                activity.startActivity(new Intent(activity, com.assettagging.view.assetdisposer.AddAssetDetailActivity.class).putExtra(Constants.TYPE, scheduleList.get(i).getType()).putExtra(Constants.SCHEDULE_NAME, scheduleList.get(i).getDescription()).putExtra(Constants.DISPOSAL_DATE, scheduleList.get(i).getDisposalDate()).putExtra(Constants.SCHEDULE_ID, scheduleList.get(i).getDisposalScheduleHeaderId()));
+                activity.startActivity(new Intent(activity, AddAssetDetailActivity.class).putExtra(Constants.TYPE, scheduleList.get(i).getType()).putExtra(Constants.SCHEDULE_NAME, scheduleList.get(i).getDescription()).putExtra(Constants.DISPOSAL_DATE, scheduleList.get(i).getDisposalDate()).putExtra(Constants.SCHEDULE_ID, scheduleList.get(i).getDisposalScheduleHeaderId()));
                 activity.overridePendingTransition(0, 0);
 
             }

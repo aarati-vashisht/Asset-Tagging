@@ -30,7 +30,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.assettagging.MyApplication;
 import com.assettagging.R;
@@ -40,12 +39,6 @@ import com.assettagging.controller.DataBaseHelper;
 import com.assettagging.model.all_data.AllData;
 import com.assettagging.model.login.ChangePassword;
 import com.assettagging.model.login.UserChangePass;
-import com.assettagging.model.movement_dimension.ListAccount;
-import com.assettagging.model.movement_dimension.ListCostcenterDimension;
-import com.assettagging.model.movement_dimension.ListProjectDimension;
-import com.assettagging.model.movement_dimension.ListSiteDimension;
-import com.assettagging.model.movement_dimension.ListWorkerDimension;
-import com.assettagging.model.movement_dimension.ListdepartmentDimension;
 import com.assettagging.model.schedule_detail.ItemCurentStatusList;
 import com.assettagging.model.schedule_detail.SaveTracking;
 import com.assettagging.model.schedule_detail.ScheduleDetail;
@@ -61,20 +54,15 @@ import com.assettagging.view.custom_control.KeyboardHideOrShow;
 import com.assettagging.view.locationwise.LocationWiseActivity;
 import com.assettagging.view.login.LoginActivity;
 import com.assettagging.view.navigation.NavigationActivity;
-import com.assettagging.view.schedule.Completed.CompletedFragment;
-import com.assettagging.view.schedule.Ongoing.OngoingFragment;
 import com.assettagging.view.schedule.ScheduleFragmnet;
-import com.assettagging.view.schedule.upcoming.UpcomingFragment;
 import com.assettagging.view.taskLocationWise.TaskWiseActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -120,6 +108,7 @@ public class ScheduleDetailActivity extends BaseActivity {
     private MenuItem menuitem;
     private MenuItem menuitemfilter;
     String ProjectSelected, DepartmentSelected, CostCenterSelected, SiteSelected, WorkerSelected, MainAccountSelected, OffsetAccountSelected;
+    private AllData allData;
 
 
     @Override
@@ -151,20 +140,39 @@ public class ScheduleDetailActivity extends BaseActivity {
         if (ScheduleFragmnet.position == 0) {
             editTextBarCode.setVisibility(View.GONE);
         }
+        NavigationActivity.getInstance().action_LoadMore.setVisible(false);
+
     }
 
     private void getScheduleDetailDataOffline() {
         List<ScheduleDetail_> scheduleDetail_list = new ArrayList<>();
-        scheduleDetail_list.addAll(dataBaseHelper.getAllAssetDetail(ScheduleId, ActivityType, EmpId, Location));
         Gson gson = new Gson();
         String json = Preferance.getAllDAta(ScheduleDetailActivity.this);
-        AllData allData = gson.fromJson(json, AllData.class);
+        allData = gson.fromJson(json, AllData.class);
         for (int i = 0; i < allData.getScheduleDetail().size(); i++) {
-            if (allData.getScheduleDetail().get(i).getEmpID().equals(EmpId) && allData.getScheduleDetail().get(i).getSCHEDULEID().equals(ScheduleId) && allData.getScheduleDetail().get(i).getLOCATION().equals(Location) && allData.getScheduleDetail().get(i).getACTIVITYTYPE().equals(ActivityType)) {
+            if (allData.getScheduleDetail().get(i).getSCHEDULEID().equals(ScheduleId) && allData.getScheduleDetail().get(i).getLOCATION().equals(Location) && allData.getScheduleDetail().get(i).getACTIVITYTYPE().equals(ActivityType)) {
                 scheduleDetail_list.add(allData.getScheduleDetail().get(i));
             }
         }
-        setAssetDetailAdapter(scheduleDetail_list, allData.getItemCurentStatusList());
+        String checkedListJson = Preferance.getCheckdedList(ScheduleDetailActivity.this);
+        Type type = new TypeToken<List<ScheduleDetail_>>() {
+        }.getType();
+        List<ScheduleDetail_> checkedListOffline = new Gson().fromJson(checkedListJson, type);
+        List<ScheduleDetail_> tempList = new ArrayList<>();
+        if (checkedListOffline != null) {
+            if (checkedListOffline.size() > 0)
+                for (int i = 0; i < scheduleDetail_list.size(); i++) {
+                    for (int j = 0; j < checkedListOffline.size(); j++) {
+                        if (!checkedListOffline.get(j).getBarCode().equals(scheduleDetail_list.get(i).getBarCode())) {
+                            tempList.add(scheduleDetail_list.get(i));
+                        }
+                    }
+                }
+
+        } else {
+            tempList.addAll(scheduleDetail_list);
+        }
+        setAssetDetailAdapter(tempList, allData.getItemCurentStatusList());
 
     }
 
@@ -214,6 +222,25 @@ public class ScheduleDetailActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+//                if (editTextBarCode.getText().toString().trim().equals("AA-DRG-N-000031")) {
+//                    scheduleDetailAdapter.filter(s.toString());
+//                    mhandler = new Handler();
+//                    mhandler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            editTextBarCode.setText("");
+//                            editTextBarCode.requestFocus();
+//                            if (mhandler != null) {
+//                                mhandler.removeCallbacksAndMessages(null);
+//                                mhandler = null;
+//
+//
+//                            }
+//                        }
+//                    }, 2000);
+//                }
+
+
                 if (!editTextBarCode.getText().toString().trim().equals("")) {
                     scheduleDetailAdapter.filter(s.toString());
                     mhandler = new Handler();
@@ -346,8 +373,6 @@ public class ScheduleDetailActivity extends BaseActivity {
                     editTextBarCode.setVisibility(View.GONE);
                     textViewNoSchedule.setVisibility(View.VISIBLE);
                     doTheAutoRefresh();
-                    //scheduleDetailAdapter.notifyDataSetChanged();
-
                 }
             } else {
                 if (firstTime) {
@@ -358,9 +383,14 @@ public class ScheduleDetailActivity extends BaseActivity {
         }
     }
 
-    private void updateDataInDataBase(List<ScheduleDetail_> scheduleDetails) throws IOException {
-        if (scheduleDetails != null) dataBaseHelper.updateScheduleDetail(scheduleDetails);
-        getScheduleDetailData();
+    Gson gson = new Gson();
+
+    private void updateDataInDataBase(List<ScheduleDetail_> checkedList) throws IOException {
+        if (checkedList != null) {
+            String AllDataJson = gson.toJson(checkedList);
+            Preferance.saveCheckdedList(ScheduleDetailActivity.this, AllDataJson);
+        }
+        getScheduleDetailDataOffline();
         scheduleDetailAdapter.notifyDataSetChanged();
     }
 
@@ -374,11 +404,11 @@ public class ScheduleDetailActivity extends BaseActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (Preferance.getTheme(this).equals("ORANGE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background,null));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background, null));
         } else if (Preferance.getTheme(this).equals("BLUE")) {
-            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
+            editTextBarCode.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            buttonSubmit.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
         }
     }
 
@@ -390,6 +420,8 @@ public class ScheduleDetailActivity extends BaseActivity {
         menuitemfilter = menu.findItem(R.id.action_filter);
         menuitem.setVisible(false);
         menuitemfilter.setVisible(false);
+        MenuItem action_LoadMore = menu.findItem(R.id.action_LoadMore);
+        action_LoadMore.setVisible(false);
         return true;
     }
 
@@ -444,16 +476,16 @@ public class ScheduleDetailActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background, null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -533,11 +565,7 @@ public class ScheduleDetailActivity extends BaseActivity {
                         @Override
                         public void onResponse(Call<SaveTracking> call, Response<SaveTracking> response) {
                             CustomProgress.endProgress();
-                            try {
-                                updateDataInDataBase(scheduleDetailAdapter.scheduleDetailList);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            //  CustomToast.showToast(ScheduleDetailActivity.this, response.message());
                             setSaveStatus(response.body());
                         }
 
@@ -548,32 +576,7 @@ public class ScheduleDetailActivity extends BaseActivity {
                         }
                     });
                 } else {
-                    for (int i = 0; i < scheduleDetailAdapter.scheduleDetailList.size(); i++) {
-                        for (int j = 0; j < scheduleDetailAdapter.checkedList.size(); j++) {
-                            if (scheduleDetailAdapter.scheduleDetailList.get(i).getBarCode().equals(scheduleDetailAdapter.checkedList.get(j).getBarCode())) {
-                                ScheduleDetail_ scheduleDetail_ = new ScheduleDetail_();
-                                scheduleDetail_.setTRACKING("1");
-                                scheduleDetail_.setBarCode(scheduleDetailAdapter.checkedList.get(j).getBarCode());
-                                scheduleDetail_.setMovementFlag(scheduleDetailAdapter.checkedList.get(j).getMovementFlag());
-                                scheduleDetail_.setASSETID(scheduleDetailAdapter.checkedList.get(j).getASSETID());
-                                scheduleDetail_.setACTIVITYTYPE(scheduleDetailAdapter.checkedList.get(j).getACTIVITYTYPE());
-                                scheduleDetail_.setEmpID(scheduleDetailAdapter.checkedList.get(j).getEmpID());
-                                scheduleDetail_.setLOCATION(scheduleDetailAdapter.checkedList.get(j).getLOCATION());
-                                scheduleDetail_.setSCHEDULEID(scheduleDetailAdapter.checkedList.get(j).getSCHEDULEID());
-                                scheduleDetail_.setBLOB(scheduleDetailAdapter.checkedList.get(j).getBLOB());
-                                scheduleDetail_.setITEMS(scheduleDetailAdapter.checkedList.get(j).getITEMS());
-                                scheduleDetail_.setBLOB_IMAGE(scheduleDetailAdapter.checkedList.get(j).getBLOB_IMAGE());
-                                scheduleDetail_.setSTARTTIME(scheduleDetailAdapter.checkedList.get(j).getSTARTTIME());
-                                scheduleDetail_.setCurentStatus(ScheduleDetailAdapter.CurentStatus);
-                                scheduleDetail_.setENDTIME(scheduleDetailAdapter.checkedList.get(j).getENDTIME());
-                                scheduleDetail_.setEMPNAME(scheduleDetailAdapter.checkedList.get(j).getEMPNAME());
-                                scheduleDetailAdapter.scheduleDetailList.set(i, scheduleDetail_);
-                                updateDataInDataBase(scheduleDetailAdapter.scheduleDetailList);
-                            }
-                        }
-                    }
-                    getScheduleDetailData();
-                    scheduleDetailAdapter.notifyDataSetChanged();
+                    updateDataInDataBase(scheduleDetailAdapter.checkedList);
                     CustomDialogForMessages.showMessageAlert(this, "Success", "Data saved Successfully");
 
                 }

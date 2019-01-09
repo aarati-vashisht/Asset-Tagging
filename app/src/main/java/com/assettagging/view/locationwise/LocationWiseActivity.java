@@ -100,7 +100,7 @@ public class LocationWiseActivity extends BaseActivity {
         String json = Preferance.getAllDAta(LocationWiseActivity.this);
         AllData allData = gson.fromJson(json, AllData.class);
         for (int i = 0; i < allData.getScheduleLocation().size(); i++) {
-            if (allData.getScheduleLocation().get(i).getEMPID().equals(EmpID) && allData.getScheduleLocation().get(i).getSCHEDULEID().equals(ScheduleId)) {
+            if (allData.getScheduleLocation().get(i).getSCHEDULEID().equals(ScheduleId)) {
                 scheduleLocationList.add(allData.getScheduleLocation().get(i));
             }
         }
@@ -301,7 +301,7 @@ public class LocationWiseActivity extends BaseActivity {
         });
     }
 
-    public static MenuItem menuitemfilter;
+    public static MenuItem menuitemfilter,action_LoadMore;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -309,6 +309,8 @@ public class LocationWiseActivity extends BaseActivity {
         inflater.inflate(R.menu.setting_menu, menu);
         menuitem = menu.findItem(R.id.action_add_new);
         menuitemfilter = menu.findItem(R.id.action_filter);
+        action_LoadMore = menu.findItem(R.id.action_LoadMore);
+        action_LoadMore.setVisible(false);
         menuitem.setVisible(false);
         menuitemfilter.setVisible(false);
         return true;

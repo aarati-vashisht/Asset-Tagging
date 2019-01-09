@@ -1,6 +1,7 @@
 package com.assettagging.model.asset_detai;
 
 
+import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.asset_disposal.DisposalWiseDataList;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -11,7 +12,7 @@ public class DisposalAssetData {
 
     @SerializedName("DisposalAssetList")
     @Expose
-    private List<DisposalWiseDataList> barcodeWiseDataList = null;
+    private List<disposalassetlist> barcodeWiseDataList = null;
     @SerializedName("message")
     @Expose
     private String message;
@@ -54,11 +55,11 @@ public class DisposalAssetData {
         this.IsExist = IsExist;
     }
 
-    public List<DisposalWiseDataList> getBarcodeWiseDataList() {
+    public List<disposalassetlist> getBarcodeWiseDataList() {
         return barcodeWiseDataList;
     }
 
-    public void setBarcodeWiseDataList(List<DisposalWiseDataList> barcodeWiseDataList) {
+    public void setBarcodeWiseDataList(List<disposalassetlist> barcodeWiseDataList) {
         this.barcodeWiseDataList = barcodeWiseDataList;
     }
 

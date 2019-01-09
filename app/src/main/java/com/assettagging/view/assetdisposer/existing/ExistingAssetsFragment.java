@@ -1,4 +1,4 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.existing;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -19,14 +19,21 @@ import android.widget.TextView;
 
 import com.assettagging.MyApplication;
 import com.assettagging.R;
+import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.controller.DataBaseHelper;
+import com.assettagging.model.all_data.AllData;
 import com.assettagging.model.asset_disposal.AssetDisposal;
 import com.assettagging.model.asset_disposal.CreatedDisposalList;
 import com.assettagging.model.asset_disposal.UserAssetDisposal;
 import com.assettagging.preference.Preferance;
+import com.assettagging.view.assetdisposer.completed.CompletedAssetsFragment;
+import com.assettagging.view.assetdisposer.DisposerFragmnet;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerAdapter;
 import com.assettagging.view.custom_control.CustomDialogForMessages;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.navigation.NavigationActivity;
+import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
+import com.google.gson.Gson;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,8 +50,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class CreatedAssetsFragment extends Fragment {
-    public static CreatedAssetsFragment instance;
+public class ExistingAssetsFragment extends Fragment {
+    public static ExistingAssetsFragment instance;
     View view;
     @BindView(R.id.recyclerViewAllSchedules)
     RecyclerView recyclerViewAllSchedules;
@@ -70,14 +77,18 @@ public class CreatedAssetsFragment extends Fragment {
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
-
+        sortedDate = "";
         return view;
     }
 
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            getAssetDisposalData();
+            if (CheckInternetConnection.isInternetConnected(getActivity())) {
+                getAssetDisposalData();
+            } else {
+                getAssetDisposalDataOffline();
+            }
             NavigationActivity.getInstance().menuitemfilter.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -95,7 +106,8 @@ public class CreatedAssetsFragment extends Fragment {
                     final TextView textViewClearAllFileter = dialog.findViewById(R.id.textViewClearAllFileter);
                     if (!sortedDate.equals("")) {
                         textViewCreatedOn.setText(getResources().getString(R.string.createdon) + ": " + sortedDate);
-                    }
+                    } else
+                        textViewCreatedOn.setText(getResources().getString(R.string.createdon));
 
                     textViewCreatedOn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -141,6 +153,23 @@ public class CreatedAssetsFragment extends Fragment {
         }
     }
 
+    private void getAssetDisposalDataOffline() {
+        Gson gson = new Gson();
+        String json = Preferance.getAllDAta(getActivity());
+        AllData allData = gson.fromJson(json, AllData.class);
+        createddisposalList.clear();
+        createddisposalList.addAll(allData.getCreatedDisposalList());
+        setAdapter(allData.getCreatedDisposalList());
+        DisposerFragmnet.getInstance().CompledeDisposalAssetList.addAll(allData.getSubmittedDisposalList());
+        if (CompletedAssetsFragment.getInstance() != null) {
+            DisposerFragmnet.getInstance().CompledeDisposalAssetList.addAll(allData.getSubmittedDisposalList());
+            CompletedAssetsFragment.getInstance().setAdapter(allData.getSubmittedDisposalList());
+        } else {
+            DisposerFragmnet.getInstance().CompledeDisposalAssetList.addAll(allData.getSubmittedDisposalList());
+        }
+
+    }
+
     private void sortListAccToDate(String format) throws ParseException {
         List<CreatedDisposalList> tempList = new ArrayList<>();
         if (createddisposalList.size() > 0) {
@@ -157,7 +186,7 @@ public class CreatedAssetsFragment extends Fragment {
         }
     }
 
-    public static CreatedAssetsFragment getInstance() {
+    public static ExistingAssetsFragment getInstance() {
         return instance;
     }
 

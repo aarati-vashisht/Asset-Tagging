@@ -1,71 +1,45 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.yet_to_submit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.assettagging.MyApplication;
 import com.assettagging.R;
-import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.controller.DataBaseHelper;
-import com.assettagging.model.asset_detai.BarcodeWiseDataList;
-import com.assettagging.model.asset_detai.SaveAssets;
-import com.assettagging.model.asset_detai.SaveDisposalTrack;
+import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.asset_disposal.DisposalWiseDataList;
-import com.assettagging.model.schedule_detail.ItemCurentStatusList;
-import com.assettagging.model.schedule_detail.ScheduleDetail_;
+import com.assettagging.model.schedule.Schedule;
 import com.assettagging.preference.Preferance;
-import com.assettagging.view.custom_control.CustomProgress;
-import com.assettagging.view.custom_control.CustomToast;
-import com.assettagging.view.dashboard.DashBoardFragment;
-import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import com.assettagging.view.assetdisposer.DisposerFragmnet;
+import com.assettagging.view.assetdisposer.existing.AddAssetDetailActivity;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DisposalAssetsAdapter extends RecyclerView.Adapter<DisposalAssetsAdapter.MyViewHolder> {
 
-    public List<DisposalWiseDataList> disposalAssets;
+    public List<disposalassetlist> disposalAssets;
     private Activity activity;
+    Set<disposalassetlist> disposalWiseDataListSet;
 
 
-    public DisposalAssetsAdapter(Activity activity, List<DisposalWiseDataList> disposalAssets) {
+    public DisposalAssetsAdapter(Activity activity, List<disposalassetlist> disposalAssets) {
         this.disposalAssets = disposalAssets;
         this.activity = activity;
-    }
+        disposalWiseDataListSet = new HashSet<>(this.disposalAssets);
+        this.disposalAssets.clear();
+        this.disposalAssets.addAll(disposalWiseDataListSet);  }
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -90,9 +64,9 @@ public class DisposalAssetsAdapter extends RecyclerView.Adapter<DisposalAssetsAd
             super(view);
             ButterKnife.bind(this, view);
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background,null));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background, null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue,null));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue, null));
             }
         }
 
@@ -110,8 +84,8 @@ public class DisposalAssetsAdapter extends RecyclerView.Adapter<DisposalAssetsAd
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
-        holder.textViewAssetId.setText(disposalAssets.get(position).getASSETID());
-        holder.textViewAssetName.setText(disposalAssets.get(position).getNAME());
+        holder.textViewAssetId.setText(disposalAssets.get(position).getAssetId());
+        holder.textViewAssetName.setText(disposalAssets.get(position).getName());
         holder.textViewAssetStatus.setText(disposalAssets.get(position).getStatus());
         if (DisposerFragmnet.position == 0) {
             holder.imageViewClose.setVisibility(View.VISIBLE);
@@ -150,7 +124,7 @@ public class DisposalAssetsAdapter extends RecyclerView.Adapter<DisposalAssetsAd
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
                 DataBaseHelper dataBaseHelper = new DataBaseHelper(activity);
-                dataBaseHelper.dropASSETSROwTable(activity, AddAssetDetailActivity.getInstance().SCHEDULE_ID, disposalAssets.get(position).getASSETID());
+                dataBaseHelper.dropASSETSROwTable(activity, AddAssetDetailActivity.getInstance().SCHEDULE_ID, disposalAssets.get(position).getAssetId());
                 disposalAssets.remove(position);
                 notifyDataSetChanged();
             }
