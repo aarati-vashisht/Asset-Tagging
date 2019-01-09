@@ -139,6 +139,8 @@ public class ScheduleDetailActivity extends BaseActivity {
         editTextBarCodeChangeListener();
         if (ScheduleFragmnet.position == 0) {
             editTextBarCode.setVisibility(View.GONE);
+        } else if (ScheduleFragmnet.position == 2) {
+            editTextBarCode.setVisibility(View.GONE);
         }
         NavigationActivity.getInstance().action_LoadMore.setVisible(false);
 
