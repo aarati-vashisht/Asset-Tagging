@@ -11,19 +11,23 @@ import android.net.NetworkInfo;
 import com.assettagging.view.custom_control.CustomToast;
 
 public class CheckInternetConnection extends BroadcastReceiver {
+    private static boolean isConnected = true;
+
     public static boolean isInternetConnected(Context context) {
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-        return isConnected;
+        try {
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
+            return isConnected;
+        } catch (Exception e) {
+            return isConnected;
+        }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // Explicitly specify that which service class will handle the intent.
-        CustomToast.showToast((Activity) context,"NetworkConnected");
         ComponentName comp = new ComponentName(context.getPackageName(),
                 NetworkHandleService.class.getName());
         intent.putExtra("isNetworkConnected", isInternetConnected(context));

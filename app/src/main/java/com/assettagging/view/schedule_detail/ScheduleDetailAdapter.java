@@ -174,7 +174,7 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
                     scheduleDetail = wp;
                     checkedList.add(wp);
                     scheduleDetailList.remove(wp);
-                    scheduleDetailList.add(0, wp);
+                    scheduleDetailList.add(0,wp);
                     ScheduleDetailActivity.editTextBarCode.setText("");
                     ScheduleDetailActivity.editTextBarCode.requestFocus();
                 }

@@ -251,7 +251,7 @@ public class YetToSubmitDisposerFragment extends Fragment {
                 schedule.setSCHEDULEID("SN_"+getCurrentTime());
                 schedule.setSCHEDULEDESCRIPTION(scheduleDesc);
                 schedule.setSTARTTIME(startDate);
-                schedule.setStatus("Started");
+                schedule.setStatus("Created");
                 schedule.setType("Disposal Sale");
                 dataBaseHelper.insertDisposerSCHEDULE(schedule);
                 setAdapter(dataBaseHelper.getAllDisposedSchedule());
@@ -266,7 +266,7 @@ public class YetToSubmitDisposerFragment extends Fragment {
                 schedule.setSCHEDULEDESCRIPTION(scheduleDesc);
                 schedule.setSTARTTIME(startDate);
                 schedule.setType("Disposal Scrap");
-                schedule.setStatus("Started");
+                schedule.setStatus("Created");
                 dataBaseHelper.insertDisposerSCHEDULE(schedule);
                 setAdapter(dataBaseHelper.getAllDisposedSchedule());
             }

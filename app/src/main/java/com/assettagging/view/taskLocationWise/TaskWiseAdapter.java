@@ -33,7 +33,8 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
         this.location = location;
         locationWiseTasksHashSet = new HashSet<>(this.locationWiseTasks);
         this.locationWiseTasks.clear();
-        this.locationWiseTasks.addAll(locationWiseTasksHashSet); }
+        this.locationWiseTasks.addAll(locationWiseTasksHashSet);
+    }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -64,14 +65,20 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
         holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
 //        holder.textViewStartTime.setText(locationWiseTasks.get(position).getSTARTTIME());
 //        holder.textViewEndTime.setText(locationWiseTasks.get(position).getSTARTTIME());
+
         if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("Inspection")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection,null));
-        }else if(locationWiseTasks.get(position).getACTIVITYTYPE().equals("tagging")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon,null));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection, null));
+        } else if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("Movement")) {
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement, null));
+            holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
+        } else if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("tagging")) {
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon, null));
             holder.textViewActivityType.setText("Tagging");
         } else {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement,null));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon, null));
+            holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
         }
+
         holder.linearLayoutRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
