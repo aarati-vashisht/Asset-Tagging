@@ -1,4 +1,4 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.completed;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -20,6 +20,8 @@ import android.widget.TextView;
 import com.assettagging.R;
 import com.assettagging.controller.DataBaseHelper;
 import com.assettagging.model.asset_disposal.CreatedDisposalList;
+import com.assettagging.view.assetdisposer.DisposerFragmnet;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerAdapter;
 import com.assettagging.view.navigation.NavigationActivity;
 
 import java.text.ParseException;

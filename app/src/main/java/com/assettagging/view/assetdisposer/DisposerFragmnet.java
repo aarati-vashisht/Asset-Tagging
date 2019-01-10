@@ -13,6 +13,9 @@ import android.view.ViewGroup;
 
 import com.assettagging.R;
 import com.assettagging.model.asset_disposal.CreatedDisposalList;
+import com.assettagging.view.assetdisposer.completed.CompletedAssetsFragment;
+import com.assettagging.view.assetdisposer.existing.ExistingAssetsFragment;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerFragment;
 import com.assettagging.view.navigation.NavigationActivity;
 import com.assettagging.controller.DataBaseHelper;
 import com.assettagging.model.login.ChangePassword;
@@ -27,13 +30,13 @@ import retrofit2.Call;
 
 public class DisposerFragmnet extends Fragment {
 
-    public static DisposerFragmnet instance;
     @BindView(R.id.tabs)
     public
     TabLayout tabLayout;
     @BindView(R.id.pager)
     public
     ViewPager pager;
+    public static DisposerFragmnet instance;
 
 
     private ScheduleAdapter scheduleAdapter;
@@ -64,7 +67,7 @@ public class DisposerFragmnet extends Fragment {
         adapter = null;
         adapter = new DisoserViewPagerAdapter(getChildFragmentManager());
         adapter.addFragment(new YetToSubmitDisposerFragment(), getString(R.string.yetToStarted));
-        adapter.addFragment(new CreatedAssetsFragment(), getString(R.string.existing));
+        adapter.addFragment(new ExistingAssetsFragment(), getString(R.string.existing));
         adapter.addFragment(new CompletedAssetsFragment(), getString(R.string.Completed));
         pager.setAdapter(adapter);
         pager.setOffscreenPageLimit(1);

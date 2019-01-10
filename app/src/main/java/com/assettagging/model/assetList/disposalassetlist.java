@@ -8,6 +8,9 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class disposalassetlist {
+    @SerializedName("AssetGroup")
+    @Expose
+    private String assetGroup;
     @SerializedName("AssetId")
     @Expose
     private String assetId;
@@ -23,9 +26,33 @@ public class disposalassetlist {
     @SerializedName("Name")
     @Expose
     private String name;
+
+    @SerializedName("ProjectId")
+    @Expose
+    private String ProjectId;
+
+    public String getProjectId() {
+        return ProjectId;
+    }
+
+    public void setProjectId(String ProjectId) {
+        this.ProjectId = ProjectId;
+    }
+
+
+
+
     @SerializedName("Status")
     @Expose
     private String status;
+
+    public String getAssetGroup() {
+        return assetGroup;
+    }
+
+    public void setAssetGroup(String assetGroup) {
+        this.assetGroup = assetGroup;
+    }
 
     public String getAssetId() {
         return assetId;

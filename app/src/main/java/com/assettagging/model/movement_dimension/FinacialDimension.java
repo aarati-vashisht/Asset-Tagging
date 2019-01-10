@@ -1,4 +1,4 @@
-package com.assettagging.model.schedule_detail;
+package com.assettagging.model.movement_dimension;
 
 
 import com.assettagging.model.movement_dimension.ListAccount;

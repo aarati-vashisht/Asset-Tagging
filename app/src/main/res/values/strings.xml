@@ -200,4 +200,5 @@
     <string name="tagnumberalreadyassigned">Tag number is already assigned to another Asset</string>
     <string name="userdoesnotexists">User does not exists</string>
     <string name="if_you_want_to_change_pass_connect_net">Please connect to Internet If you want to change Password.</string>
+    <string name="loaddata">Load Data</string>
 </resources>

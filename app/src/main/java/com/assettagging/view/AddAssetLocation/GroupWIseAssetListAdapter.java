@@ -16,6 +16,7 @@ import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.asset_detai.BarcodeWiseDataList;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
@@ -26,6 +27,7 @@ import butterknife.ButterKnife;
  */
 
 public class GroupWIseAssetListAdapter extends RecyclerView.Adapter<GroupWIseAssetListAdapter.ViewHolder> {
+    private final HashSet<disposalassetlist> disposalassetlistHashSet;
     private List<disposalassetlist> mData;
     private Activity activity;
     public List<BarcodeWiseDataList> checkedList = new ArrayList<>();
@@ -38,7 +40,9 @@ public class GroupWIseAssetListAdapter extends RecyclerView.Adapter<GroupWIseAss
         instance = this;
         checkedList.clear();
         items = new boolean[this.mData.size()];
-
+        disposalassetlistHashSet = new HashSet<>(this.mData);
+        this.mData.clear();
+        this.mData.addAll(disposalassetlistHashSet);
     }
 
     public static GroupWIseAssetListAdapter getInstance() {

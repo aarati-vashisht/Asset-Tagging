@@ -2,10 +2,8 @@ package com.assettagging.view.schedule_detail;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -23,7 +21,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -32,13 +29,14 @@ import android.widget.TextView;
 import com.assettagging.MyApplication;
 import com.assettagging.R;
 import com.assettagging.controller.CheckInternetConnection;
+import com.assettagging.model.all_data.AllData;
 import com.assettagging.model.movement_dimension.ListAccount;
 import com.assettagging.model.movement_dimension.ListCostcenterDimension;
 import com.assettagging.model.movement_dimension.ListProjectDimension;
 import com.assettagging.model.movement_dimension.ListSiteDimension;
 import com.assettagging.model.movement_dimension.ListWorkerDimension;
 import com.assettagging.model.movement_dimension.ListdepartmentDimension;
-import com.assettagging.model.schedule_detail.FinacialDimension;
+import com.assettagging.model.movement_dimension.FinacialDimension;
 import com.assettagging.model.schedule_detail.ItemCurentStatusList;
 import com.assettagging.model.schedule_detail.ScheduleDetail_;
 import com.assettagging.preference.Preferance;
@@ -64,6 +62,7 @@ import retrofit2.Response;
 
 public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAdapter.MyViewHolder> {
 
+    private final HashSet<ScheduleDetail_> scheduleDetailListHashSet;
     public List<ScheduleDetail_> scheduleDetailList;
     private Activity activity;
     private String searchString = "";
@@ -101,9 +100,26 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
                 scheduleDetailList.get(i).setTRACKING("1");
             }
         }
-        if (ScheduleDetailActivity.getInstance().ActivityType.equals("Movement"))
-            callFinacialDimensionService(0, scheduleDetailList.get(0));
-
+        if (CheckInternetConnection.isInternetConnected(activity)) {
+            if (ScheduleDetailActivity.getInstance().ActivityType.equals("Movement"))
+                callFinacialDimensionService(0, scheduleDetailList.get(0));
+        } else {
+            if (ScheduleDetailActivity.getInstance().ActivityType.equals("Movement")) {
+                Gson gson = new Gson();
+                String json = Preferance.getAllDAta(activity);
+                finacialDimension = new FinacialDimension();
+                AllData allData = gson.fromJson(json, AllData.class);
+                finacialDimension.setlistAccount(allData.getlistAccount());
+                finacialDimension.setListCostcenterDimension(allData.getListCostcenterDimension());
+                finacialDimension.setListdepartmentDimension(allData.getListdepartmentDimension());
+                finacialDimension.setListProjectDimension(allData.getListProjectDimension());
+                finacialDimension.setListSiteDimension(allData.getListSiteDimension());
+                finacialDimension.setListWorkerDimension(allData.getListWorkerDimension());
+            }
+        }
+        scheduleDetailListHashSet = new HashSet<>(this.scheduleDetailList);
+        this.scheduleDetailList.clear();
+        this.scheduleDetailList.addAll(scheduleDetailListHashSet);
     }
 
     public static Bitmap getBitmapFromURL(final String src) {
@@ -157,7 +173,8 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
                     scheduleDetail = new ScheduleDetail_();
                     scheduleDetail = wp;
                     checkedList.add(wp);
-
+                    scheduleDetailList.remove(wp);
+                    scheduleDetailList.add(0,wp);
                     ScheduleDetailActivity.editTextBarCode.setText("");
                     ScheduleDetailActivity.editTextBarCode.requestFocus();
                 }
@@ -191,9 +208,9 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             super(view);
             ButterKnife.bind(this, view);
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background, null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue));
+                card_view.setForeground(activity.getResources().getDrawable(R.drawable.cardview_background_blue, null));
             }
         }
 
@@ -315,29 +332,21 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
 
     }
 
-    private void callFinacialDimensionService(final int position, final ScheduleDetail_ scheduleDetail) {
+    private void callFinacialDimensionService(final int position,
+                                              final ScheduleDetail_ scheduleDetail) {
         CustomProgress.startProgress(activity);
-        // relativeLayoutTop.setBackgroundColor(Color.parseColor("#30000000"));
-        //   relativeLayout.setVisibility(View.VISIBLE);
         Call<FinacialDimension> call = MyApplication.apiInterface.GetDimesionData();
         call.enqueue(new Callback<FinacialDimension>() {
             @Override
             public void onResponse(Call<FinacialDimension> call, Response<FinacialDimension> response) {
                 CustomProgress.endProgress();
                 finacialDimension = response.body();
-                //   relativeLayoutTop.setBackgroundColor(Color.parseColor("#00000000"));
-                //  relativeLayout.setVisibility(View.GONE);
-               // bindingAdapter(response.body());
-               // supdateFinacialDimesion(response.body(), position);
-
             }
 
             @Override
             public void onFailure(Call<FinacialDimension> call, Throwable t) {
                 CustomProgress.endProgress();
                 finacialDimension = null;
-                //   relativeLayoutTop.setBackgroundColor(Color.parseColor("#00000000"));
-                //    relativeLayout.setVisibility(View.GONE);
                 CustomToast.showToast(activity, activity.getString(R.string.something_bad_happened));
                 if (checkedList.size() > 0)
                     if (checkedList.size() >= position + 1) checkedList.remove(position);
@@ -440,49 +449,6 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
                     }
                 });
 
-                mainAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        mainString = parent.getAdapter().getItem(position).toString();
-                        if (offsetAccount.getSelectedItem().toString().contains("Select Item")) {
-                            ScheduleDetailActivity.getInstance().MainAccountSelected = body.getlistAccount().get(position).getMainAccountNo();
-                        } else if (mainString.equals(offsetAccount.getSelectedItem().toString())) {
-                            CustomToast.showToast(activity, "Please Select Different Main Account");
-                            ScheduleDetailActivity.getInstance().MainAccountSelected = body.getlistAccount().get(0).getMainAccountNo();
-                            mainAccount.setSelection(0);
-                        } else {
-                            ScheduleDetailActivity.getInstance().MainAccountSelected = body.getlistAccount().get(position).getMainAccountNo();
-                        }
-
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-
-                offsetAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        offsetString = parent.getAdapter().getItem(position).toString();
-                        if (mainAccount.getSelectedItem().toString().contains("Select Item")) {
-                            ScheduleDetailActivity.getInstance().OffsetAccountSelected = body.getlistAccount().get(position).getMainAccountNo();
-                        } else if (offsetString.equals(mainAccount.getSelectedItem().toString())) {
-                            CustomToast.showToast(activity, "Please Select Different Offset Account");
-                            ScheduleDetailActivity.getInstance().OffsetAccountSelected = body.getlistAccount().get(0).getMainAccountNo();
-                            offsetAccount.setSelection(0);
-                        } else {
-                            ScheduleDetailActivity.getInstance().OffsetAccountSelected = body.getlistAccount().get(position).getMainAccountNo();
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-
             } else {
                 CustomToast.showToast(activity, activity.getString(R.string.something_bad_happened));
                 checkedList.remove(position);
@@ -490,14 +456,15 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             }
     }
 
-    SearchableSpinner project, department, costCenter, site, worker, mainAccount, offsetAccount;
+    SearchableSpinner project, department, costCenter, site, worker;
 
-    public void dialogForMovementDimension(int position, final ScheduleDetail_ scheduleDetail, final FinacialDimension body) {
+    public void dialogForMovementDimension(int position, final ScheduleDetail_ scheduleDetail,
+                                           final FinacialDimension body) {
         if (dialog == null) {
             dialog = new Dialog(activity);
             dialog.setCanceledOnTouchOutside(false);
             dialog.setCancelable(false);
-            dialog.setContentView(R.layout.activity_movement_dimensio);
+            dialog.setContentView(R.layout.dialog_finacial_dimension);
             dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
             project = dialog.findViewById(R.id.project);
@@ -507,8 +474,6 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             relativeLayout = dialog.findViewById(R.id.relativeLayout);
             relativeLayoutTop = dialog.findViewById(R.id.relativeLayoutTop);
             worker = dialog.findViewById(R.id.worker);
-            mainAccount = dialog.findViewById(R.id.mainAccount);
-            offsetAccount = dialog.findViewById(R.id.offsetAccount);
             Button movement_dimension_submit = dialog.findViewById(R.id.movement_dimension_submit);
             relativeLayoutTop.setBackgroundColor(activity.getResources().getColor(android.R.color.transparent));
             relativeLayout.setVisibility(View.GONE);
@@ -516,37 +481,31 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
                 callFinacialDimensionService(position, scheduleDetail);
             } else {
                 bindingAdapter(finacialDimension);
-                 supdateFinacialDimesion(finacialDimension, position);
+                supdateFinacialDimesion(finacialDimension, position);
             }
             movement_dimension_submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mainAccount.getSelectedItem().toString().contains("Select Item") && !offsetAccount.getSelectedItem().toString().contains("Select Item")) {
-                        CustomToast.showToast(activity, "Please select Main Account");
-                    } else if (offsetAccount.getSelectedItem().toString().contains("Select Item") && !mainAccount.getSelectedItem().toString().contains("Select Item")) {
-                        CustomToast.showToast(activity, "Please select Offset Account");
-                    } else {
-                        for (int i = 0; i < checkedList.size(); i++) {
-                            if (checkedList.get(i).getBarCode().equals(scheduleDetail.getBarCode())) {
-                                checkedList.get(i).setAccount(ScheduleDetailActivity.getInstance().MainAccountSelected);
-                                checkedList.get(i).setOffset(ScheduleDetailActivity.getInstance().OffsetAccountSelected);
-                                checkedList.get(i).setCostcenter(ScheduleDetailActivity.getInstance().CostCenterSelected);
-                                checkedList.get(i).setProject(ScheduleDetailActivity.getInstance().ProjectSelected);
-                                checkedList.get(i).setDepartment(ScheduleDetailActivity.getInstance().DepartmentSelected);
-                                checkedList.get(i).setSite(ScheduleDetailActivity.getInstance().SiteSelected);
-                                checkedList.get(i).setWorker(ScheduleDetailActivity.getInstance().WorkerSelected);
-                                ;
-                                checkedList.get(i).setITEMS("");
-                            }
+
+
+                    for (int i = 0; i < checkedList.size(); i++) {
+                        if (checkedList.get(i).getBarCode().equals(scheduleDetail.getBarCode())) {
+                            checkedList.get(i).setCostcenter(ScheduleDetailActivity.getInstance().CostCenterSelected);
+                            checkedList.get(i).setProject(ScheduleDetailActivity.getInstance().ProjectSelected);
+                            checkedList.get(i).setDepartment(ScheduleDetailActivity.getInstance().DepartmentSelected);
+                            checkedList.get(i).setSite(ScheduleDetailActivity.getInstance().SiteSelected);
+                            checkedList.get(i).setWorker(ScheduleDetailActivity.getInstance().WorkerSelected);
+                            ;
+                            checkedList.get(i).setITEMS("");
                         }
-                        Gson gson = new GsonBuilder().create();
-                        JsonArray myCustomArray = gson.toJsonTree(checkedList).getAsJsonArray();
-                        ScheduleDetailActivity.ScannedList = myCustomArray;
-                        opened = false;
-                        dialog.cancel();
-                        dialog.dismiss();
-                        dialog = null;
                     }
+                    Gson gson = new GsonBuilder().create();
+                    JsonArray myCustomArray = gson.toJsonTree(checkedList).getAsJsonArray();
+                    ScheduleDetailActivity.ScannedList = myCustomArray;
+                    opened = false;
+                    dialog.cancel();
+                    dialog.dismiss();
+                    dialog = null;
 
 
                 }
@@ -565,7 +524,8 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
     RadioGroup radioGroupItems;
     Dialog dialogInspection;
 
-    private void openDialogforItems(final ScheduleDetail_ SCHEDULE, List<ItemCurentStatusList> ITEM, final View itemView) {
+    private void openDialogforItems(final ScheduleDetail_ SCHEDULE, List<
+            ItemCurentStatusList> ITEM, final View itemView) {
         if (dialogInspection == null) {
             dialogInspection = new Dialog(activity);
             dialogInspection.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -581,9 +541,9 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             radioGroupItems = dialogInspection.findViewById(R.id.radioGroupItems);
 
             if (Preferance.getTheme(activity).equals("ORANGE")) {
-                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background));
+                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background, null));
             } else if (Preferance.getTheme(activity).equals("BLUE")) {
-                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background_blue));
+                customButtonSaveTracking.setBackground(activity.getResources().getDrawable(R.drawable.button_background_blue, null));
 
             }
             for (int i = 0; i < ITEM.size(); i++) {
@@ -665,13 +625,7 @@ public class ScheduleDetailAdapter extends RecyclerView.Adapter<ScheduleDetailAd
             adapterList5.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             worker.setAdapter(adapterList5);
 
-            ArrayAdapter<ListAccount> adapterList6 = new ArrayAdapter<ListAccount>(activity, android.R.layout.simple_spinner_item, body.getlistAccount());
-            adapterList6.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mainAccount.setAdapter(adapterList6);
 
-            ArrayAdapter<ListAccount> adapterList7 = new ArrayAdapter<ListAccount>(activity, android.R.layout.simple_spinner_item, body.getlistAccount());
-            adapterList7.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            offsetAccount.setAdapter(adapterList7);
         }
     }
 

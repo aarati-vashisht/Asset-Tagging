@@ -1,4 +1,4 @@
-package com.assettagging.view.assetdisposer;
+package com.assettagging.view.assetdisposer.yet_to_submit;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -10,10 +10,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -253,7 +251,7 @@ public class YetToSubmitDisposerFragment extends Fragment {
                 schedule.setSCHEDULEID("SN_"+getCurrentTime());
                 schedule.setSCHEDULEDESCRIPTION(scheduleDesc);
                 schedule.setSTARTTIME(startDate);
-                schedule.setStatus("Started");
+                schedule.setStatus("Created");
                 schedule.setType("Disposal Sale");
                 dataBaseHelper.insertDisposerSCHEDULE(schedule);
                 setAdapter(dataBaseHelper.getAllDisposedSchedule());
@@ -268,7 +266,7 @@ public class YetToSubmitDisposerFragment extends Fragment {
                 schedule.setSCHEDULEDESCRIPTION(scheduleDesc);
                 schedule.setSTARTTIME(startDate);
                 schedule.setType("Disposal Scrap");
-                schedule.setStatus("Started");
+                schedule.setStatus("Created");
                 dataBaseHelper.insertDisposerSCHEDULE(schedule);
                 setAdapter(dataBaseHelper.getAllDisposedSchedule());
             }

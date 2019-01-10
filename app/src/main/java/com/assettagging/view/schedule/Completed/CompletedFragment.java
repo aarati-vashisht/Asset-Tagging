@@ -10,11 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.assettagging.R;
 import com.assettagging.model.schedule.Schedule;
-import com.assettagging.view.custom_control.CustomToast;
 import com.assettagging.view.navigation.NavigationActivity;
 import com.assettagging.view.schedule.ScheduleAdapter;
 
@@ -65,14 +63,19 @@ public class CompletedFragment extends Fragment {
 
     public void setAdapter(List<Schedule> compSchedule) {
         if (NavigationActivity.getInstance().scheduleData != null) {
-            recyclerViewSchedule.setVisibility(View.VISIBLE);
-            textViewNoSchedule.setVisibility(View.GONE);
-            scheduleAdapter = new ScheduleAdapter(activity, NavigationActivity.getInstance().scheduleData.getCompSchedule());
-            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
-            recyclerViewSchedule.setLayoutManager(mLayoutManager);
-            recyclerViewSchedule.setItemAnimator(new DefaultItemAnimator());
-            recyclerViewSchedule.setAdapter(scheduleAdapter);
-            scheduleAdapter.notifyDataSetChanged();
+            if (compSchedule.size() > 0) {
+                recyclerViewSchedule.setVisibility(View.VISIBLE);
+                textViewNoSchedule.setVisibility(View.GONE);
+                scheduleAdapter = new ScheduleAdapter(activity, NavigationActivity.getInstance().scheduleData.getCompSchedule());
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
+                recyclerViewSchedule.setLayoutManager(mLayoutManager);
+                recyclerViewSchedule.setItemAnimator(new DefaultItemAnimator());
+                recyclerViewSchedule.setAdapter(scheduleAdapter);
+                scheduleAdapter.notifyDataSetChanged();
+            } else {
+                recyclerViewSchedule.setVisibility(View.GONE);
+                textViewNoSchedule.setVisibility(View.VISIBLE);
+            }
         } else {
             if (compSchedule.size() > 0) {
                 recyclerViewSchedule.setVisibility(View.VISIBLE);

@@ -1,6 +1,5 @@
 package com.assettagging.controller;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +10,8 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
-import com.assettagging.model.all_data.UserList;
+import com.assettagging.model.all_user.UserList;
+import com.assettagging.model.assetList.disposalassetlist;
 import com.assettagging.model.asset_detai.BarcodeWiseDataList;
 import com.assettagging.model.asset_disposal.CreatedDisposalList;
 import com.assettagging.model.asset_disposal.DisposalWiseDataList;
@@ -717,8 +717,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return barcodeWiseDataLists;
     }
 
-    public List<DisposalWiseDataList> getParticularDisposalAssets(String scheduleId) {
-        List<DisposalWiseDataList> barcodeWiseDataLists = new ArrayList<>();
+    public List<disposalassetlist> getParticularDisposalAssets(String scheduleId) {
+        List<disposalassetlist> barcodeWiseDataLists = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         //  Cursor cursor = db.rawQuery(selectQuery, null)
@@ -730,10 +730,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                DisposalWiseDataList barcodeWiseDataList = new DisposalWiseDataList();
-                barcodeWiseDataList.setASSETID(cursor.getString(cursor.getColumnIndex(ASSETID)));
-                barcodeWiseDataList.setNAME(cursor.getString(cursor.getColumnIndex(NAME)));
-                barcodeWiseDataList.setLOCATION(cursor.getString(cursor.getColumnIndex(LOCATION)));
+                disposalassetlist barcodeWiseDataList = new disposalassetlist();
+                barcodeWiseDataList.setAssetId(cursor.getString(cursor.getColumnIndex(ASSETID)));
+                barcodeWiseDataList.setName(cursor.getString(cursor.getColumnIndex(NAME)));
+                barcodeWiseDataList.setLocation(cursor.getString(cursor.getColumnIndex(LOCATION)));
                 barcodeWiseDataList.setBarcode(cursor.getString(cursor.getColumnIndex(EBarcodeId)));
                 barcodeWiseDataList.setStatus(cursor.getString(cursor.getColumnIndex(Status)));
 

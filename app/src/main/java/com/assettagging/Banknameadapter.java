@@ -1,16 +1,13 @@
 package com.assettagging;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.model.user_tracking.Location;
 
 import java.util.ArrayList;
@@ -23,11 +20,13 @@ public class Banknameadapter extends BaseAdapter {
     LayoutInflater inflater;
     private List<Location> banklist = null;
     private ArrayList<Location> arraylist;
+    String string;
 
-    public Banknameadapter(Context context, List<Location> banklist) {
+    public Banknameadapter(Context context, List<Location> banklist, String string) {
 
         mContext = context;
         this.banklist = banklist;
+        this.string = string;
         inflater = LayoutInflater.from(mContext);
         this.arraylist = new ArrayList<Location>();
         this.arraylist.addAll(banklist);
@@ -55,13 +54,37 @@ public class Banknameadapter extends BaseAdapter {
     public View getView(final int position, View view, ViewGroup parent) {
         final ViewHolder holder;
 
-            holder = new ViewHolder();
-            view = inflater.inflate(R.layout.bankname_adapter, null);
-            // Locate the TextViews in listview_item.xml
-            holder.bankname = view.findViewById(R.id.tv_banknameadapter);
-            view.setTag(holder);
-         if (banklist.get(position).getLocationName().length() > 0)
-                holder.bankname.setText(banklist.get(position).getLocationName());
+        holder = new ViewHolder();
+        view = inflater.inflate(R.layout.bankname_adapter, null);
+        // Locate the TextViews in listview_item.xml
+        holder.bankname = view.findViewById(R.id.tv_banknameadapter);
+        view.setTag(holder);
+        if (string.equals("Location")) {
+            if (CheckInternetConnection.isInternetConnected(mContext)) {
+                if (banklist.get(position).getName().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getName());
+            } else {
+                if (banklist.get(position).getLocationNameOff().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getLocationNameOff());
+            }
+        } else if (string.equals("Project")) {
+            if (CheckInternetConnection.isInternetConnected(mContext)) {
+                if (banklist.get(position).getName().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getName());
+            } else {
+                if (banklist.get(position).getName().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getName());
+            }
+        } else if (string.equals("Asset Group")) {
+            if (CheckInternetConnection.isInternetConnected(mContext)) {
+                if (banklist.get(position).getName().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getName());
+            } else {
+                if (banklist.get(position).getName().length() > 0)
+                    holder.bankname.setText(banklist.get(position).getName());
+            }
+        }
+
 
         return view;
     }
@@ -77,9 +100,16 @@ public class Banknameadapter extends BaseAdapter {
             banklist.addAll(arraylist);
         } else {
             for (Location wp : arraylist) {
-                if (wp.getLocationName().toLowerCase(Locale.getDefault()).contains(charText)) {
-                    banklist.add(wp);
+                if (CheckInternetConnection.isInternetConnected(mContext)) {
+                    if (wp.getName().toLowerCase(Locale.getDefault()).contains(charText)) {
+                        banklist.add(wp);
+                    }
+                } else {
+                    if (wp.getLocationNameOff().toLowerCase(Locale.getDefault()).contains(charText)) {
+                        banklist.add(wp);
+                    }
                 }
+
             }
         }
         notifyDataSetChanged();
