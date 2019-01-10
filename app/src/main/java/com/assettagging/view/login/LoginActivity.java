@@ -26,19 +26,15 @@ import android.widget.TextView;
 import com.assettagging.MyApplication;
 import com.assettagging.R;
 import com.assettagging.controller.CheckInternetConnection;
-import com.assettagging.controller.Constants;
 import com.assettagging.controller.DataBaseHelper;
 import com.assettagging.model.WebServer.APIClient;
 import com.assettagging.model.WebServer.APIInterface;
-import com.assettagging.model.all_data.ActvityCount;
-import com.assettagging.model.all_data.AllData;
-import com.assettagging.model.all_data.UserList;
+import com.assettagging.model.all_user.AllUSerData;
+import com.assettagging.model.all_user.UserList;
 import com.assettagging.model.login.ForgotUser;
 import com.assettagging.model.login.Login;
 import com.assettagging.model.login.LoginUser;
 import com.assettagging.model.login.ResetUser;
-import com.assettagging.model.schedule.ScheduleData;
-import com.assettagging.model.schedule.UserSchedule;
 import com.assettagging.preference.Preferance;
 import com.assettagging.view.BaseActivity;
 import com.assettagging.view.custom_control.CustomDialogForMessages;
@@ -94,6 +90,7 @@ public class LoginActivity extends BaseActivity implements CustomViews {
 
     public static final String ipaddressPrefrence = "IPAddress Prefrence";
     private Dialog dialog;
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,22 +99,21 @@ public class LoginActivity extends BaseActivity implements CustomViews {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         KeyboardHideOrShow.showKeyboard(this);
         setContentView(R.layout.activity_login);
+        gson = new Gson();
         ButterKnife.bind(this);
         if (Preferance.getTheme(this).equals("ORANGE")) {
-            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background));
-            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background));
+            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background, null));
+            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background, null));
+            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background, null));
+            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background, null));
             linearLayoutBackground.setBackgroundResource(R.mipmap.background);
         } else if (Preferance.getTheme(this).equals("BLUE")) {
-            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue));
-            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            editTextUserPin.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue, null));
+            editTextUserPassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue, null));
+            editTextEmailId.setBackground(getResources().getDrawable(R.drawable.edittext_background_blue, null));
+            buttonLogin.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
             linearLayoutBackground.setBackgroundResource(R.mipmap.background_blue);
         }
-
-
         dbHelper = new DataBaseHelper(this);
 
         overridePendingTransition(0, 0);
@@ -129,88 +125,40 @@ public class LoginActivity extends BaseActivity implements CustomViews {
         linearLayoutForgotPassword.setAlpha(0);
         linearLayoutForgotPassword.setVisibility(View.GONE);
         editTextUserPin.requestFocus();
-        getAllData();
+        getUserList();
 
     }
 
-    private void getAllData() {
-        CustomProgress.startProgress(LoginActivity.this);
-        Call<AllData> call = MyApplication.apiInterface.getAllData();
-        call.enqueue(new Callback<AllData>() {
+    private void getUserList() {
+        Call<AllUSerData> call = MyApplication.apiInterface.getAllUser();
+        call.enqueue(new Callback<AllUSerData>() {
             @Override
-            public void onResponse(Call<AllData> call, Response<AllData> response) {
-                CustomProgress.endProgress();
-                try {
-                    setAllDataResponse(response.body());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            public void onResponse(Call<AllUSerData> call, Response<AllUSerData> response) {
+                finishProgress();
+                setAllUserData(response.body());
 
             }
 
             @Override
-            public void onFailure(Call<AllData> call, Throwable t) {
-                CustomProgress.endProgress();
-                try {
-                    setAllDataResponse(null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            public void onFailure(Call<AllUSerData> call, Throwable t) {
+                finishProgress();
+                setAllUserData(null);
+
             }
         });
     }
 
-    AllData allData;
-
-    private void setAllDataResponse(AllData body) throws IOException {
-        allData = body;
-        Gson gson = new Gson();
-        Type userType = new TypeToken<List<ActvityCount>>() {
-        }.getType();
-        if (allData.getUserList() != null && allData != null) {
-            allData.getOngoingSchedule().clear();
-            allData.getUpcomingSchedule().clear();
-            String UserListJson = gson.toJson(allData.getUserList(), userType);
-            Preferance.setUserList(this, UserListJson);
-            ///Save AllData
-            String AllDataJson = gson.toJson(allData);
-            Preferance.saveAllDAta(LoginActivity.this, AllDataJson);
-            for (int i = 0; i < allData.getUserList().size(); i++) {
-                getScheduleData(allData.getUserList().get(i).getUserId());
+    private void setAllUserData(AllUSerData body) {
+        if (body != null) {
+            if (body.getStatus().equals("success")) {
+                String json = gson.toJson(body.getUserList());
+                Preferance.setUserList(LoginActivity.this, json);
+            } else {
             }
         } else {
-            CustomToast.showToast(this, getResources().getString(R.string.datasavedsuccessfully));
-        }
-
-    }
-
-    private void getScheduleData(final String userId) {
-        UserSchedule userSchedule = new UserSchedule(userId);
-        Call<ScheduleData> call = MyApplication.apiInterface.getUserSchedule(userSchedule);
-        call.enqueue(new Callback<ScheduleData>() {
-            @Override
-            public void onResponse(Call<ScheduleData> call, Response<ScheduleData> response) {
-                setScheduleResponse(response.body(), userId);
-            }
-
-            @Override
-            public void onFailure(Call<ScheduleData> call, Throwable t) {
-                setScheduleResponse(null, userId);
-            }
-        });
-    }
-
-    private void setScheduleResponse(ScheduleData body, String userId) {
-        if (body != null) {
-            for (int i = 0; i < allData.getOngoingSchedule().size(); i++) {
-                body.getOngoingSchedule().get(i).setEmpId(userId);
-            } for (int i = 0; i < allData.getUpcomingSchedule().size(); i++) {
-                body.getUpcomingSchedule().get(i).setEmpId(userId);
-            }
-            allData.setOngoingSchedule(body.getOngoingSchedule());
-            allData.setUpcomingSchedule(body.getUpcomingSchedule());
         }
     }
+
 
     public void onLoginInClick(View view) {
         if (dialog != null) {
@@ -293,7 +241,6 @@ public class LoginActivity extends BaseActivity implements CustomViews {
             }
         });
 
-
     }
 
     private void setLoginResponse(Login body) throws IOException {
@@ -321,29 +268,6 @@ public class LoginActivity extends BaseActivity implements CustomViews {
             }
 
         }
-    }
-
-    private void SaveDatainDataBase(AllData body) throws IOException {
-        if (body != null) {
-            dbHelper.dropTable();
-            dbHelper.insertUSER(body.getUserList());
-            dbHelper.insertOngoingSCHEDULE(body.getOngoingSchedule());
-            dbHelper.insertUpcomingSCHEDULE(body.getUpcomingSchedule());
-            dbHelper.insertScheduleDetail(body.getScheduleDetail(), body.getItemCurentStatusList());
-            dbHelper.insertScheduleLocationTask(body.getScheduleLocationTask());
-            dbHelper.insertscheduleLocation(body.getScheduleLocation());
-            dbHelper.updateScheduleDetail(body.getScheduleDetail());
-            SharedPreferences sharedPreferences = getSharedPreferences(Constants.Action_Count, 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            Gson gson = new Gson();
-            List<ActvityCount> textList = new ArrayList<ActvityCount>();
-            textList.addAll(body.getActvityCount());
-            String jsonText = gson.toJson(textList);
-            editor.putString(Constants.Action_Count, jsonText);
-            editor.apply();
-        }
-
-
     }
 
 

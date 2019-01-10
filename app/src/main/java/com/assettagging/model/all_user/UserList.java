@@ -1,10 +1,9 @@
-package com.assettagging.model.all_data;
+package com.assettagging.model.all_user;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class UserList {
-
     @SerializedName("Password")
     @Expose
     private String password;

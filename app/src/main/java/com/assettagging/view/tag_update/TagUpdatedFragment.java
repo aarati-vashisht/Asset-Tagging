@@ -21,13 +21,20 @@ import android.widget.TextView;
 
 import com.assettagging.MyApplication;
 import com.assettagging.R;
+import com.assettagging.controller.CheckInternetConnection;
 import com.assettagging.model.Upadte_tag;
+import com.assettagging.model.all_data.AllData;
 import com.assettagging.model.asset_detai.AssetData;
 import com.assettagging.model.asset_detai.UserAssets;
 import com.assettagging.model.user_tracking.TrackingStatus;
 import com.assettagging.preference.Preferance;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.custom_control.CustomToast;
+import com.assettagging.view.navigation.NavigationActivity;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -109,8 +116,14 @@ public class TagUpdatedFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().trim().length() > 0)
-                    callService(s.toString());
+                if (s.toString().trim().length() > 0) {
+                    if (CheckInternetConnection.isInternetConnected(getActivity())) {
+                        callService(s.toString());
+                    } else {
+                        callServiceOffline(s.toString());
+
+                    }
+                }
 
             }
         });
@@ -126,8 +139,11 @@ public class TagUpdatedFragment extends Fragment {
         editTextUpdatedBarCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
-                    if (editTextUpdatedBarCode.getText().toString().trim().length() > 0)
+                    if (editTextUpdatedBarCode.getText().toString().trim().length() > 0) {
                         callUpdateTagService();
+
+                    }
+
                 }
                 return false;
             }
@@ -154,6 +170,31 @@ public class TagUpdatedFragment extends Fragment {
 
             }
         });
+    }
+
+    private void callServiceOffline(String string) {
+        Gson gson = new Gson();
+        String json = Preferance.getAllDAta(getActivity());
+        AllData allData = gson.fromJson(json, AllData.class);
+        if (allData != null)
+            for (int i = 0; i < allData.getListGetAssetAssetGruopwise().size(); i++) {
+                if (string.equals(allData.getListGetAssetAssetGruopwise().get(i).getBarcode())) {
+                    linearLayoutcontainer.setVisibility(View.VISIBLE);
+                    textViewtag.setVisibility(View.VISIBLE);
+                    editTextUpdatedBarCode.setVisibility(View.VISIBLE);
+                    customButtonSubmit.setVisibility(View.VISIBLE);
+                    linearLayoutBaseContainer.setAlpha((float) 0.5);
+                    editTextBarCode.setEnabled(false);
+                    editTextUpdatedBarCode.requestFocus();
+
+                    textViewAseetId.setText(allData.getListGetAssetAssetGruopwise().get(i).getAssetId());
+                    textViewAssetName.setText(allData.getListGetAssetAssetGruopwise().get(i).getName());
+                    textViewLocation.setText(allData.getListGetAssetAssetGruopwise().get(i).getLocation());
+                    textViewBarcode.setText(allData.getListGetAssetAssetGruopwise().get(i).getBarcode());
+                    textViewProjectId.setText(allData.getListGetAssetAssetGruopwise().get(i).getProjectId());
+                    textViewProjectName.setText("");
+                }
+            }
     }
 
     private void addText(String nstring) {
@@ -263,36 +304,43 @@ public class TagUpdatedFragment extends Fragment {
                 disableAllViews();
                 final String userId = Preferance.getUserId(getActivity());
                 CustomProgress.startProgress(getActivity());
-                Upadte_tag upadte_tag = new Upadte_tag(userId, textViewLocation.getText().toString(), textViewProjectId.getText().toString(), textViewAseetId.getText().toString(), editTextUpdatedBarCode.getText().toString());
-                Call<TrackingStatus> call = MyApplication.apiInterface.UpDateTagNo(upadte_tag);
-                call.enqueue(new Callback<TrackingStatus>() {
-                    @Override
-                    public void onResponse(Call<TrackingStatus> call, Response<TrackingStatus> response) {
-                        CustomProgress.endProgress();
-                        if (response.body().getStatus().equals("success")) {
-                            if (response.body().getMessage().equals("Tag No. Already Exist.")) {
-                                CustomToast.showToast(getActivity(), getResources().getString(R.string.tagnumberalreadyassigned));
+                if (CheckInternetConnection.isInternetConnected(getActivity())) {
+                    Upadte_tag upadte_tag = new Upadte_tag(userId, textViewLocation.getText().toString(), textViewProjectId.getText().toString(), textViewAseetId.getText().toString(), editTextUpdatedBarCode.getText().toString());
+                    Call<TrackingStatus> call = MyApplication.apiInterface.UpDateTagNo(upadte_tag);
+                    call.enqueue(new Callback<TrackingStatus>() {
+                        @Override
+                        public void onResponse(Call<TrackingStatus> call, Response<TrackingStatus> response) {
+                            CustomProgress.endProgress();
+                            if (response.body().getStatus().equals("success")) {
+                                if (response.body().getMessage().equals("Tag No. Already Exist.")) {
+                                    CustomToast.showToast(getActivity(), getResources().getString(R.string.tagnumberalreadyassigned));
+                                } else {
+                                    enableAllViews();
+                                    linearLayoutBaseContainer.setAlpha((float) 1);
+                                    editTextUpdatedBarCode.setVisibility(View.GONE);
+                                    linearLayoutcontainer.setVisibility(View.GONE);
+                                    customButtonSubmit.setVisibility(View.GONE);
+                                    textViewtag.setVisibility(View.GONE);
+                                    CustomToast.showToast(getActivity(), getResources().getString(R.string.datasavedsuccessfully));
+                                }
                             } else {
-                                enableAllViews();
-                                linearLayoutBaseContainer.setAlpha((float) 1);
-                                editTextUpdatedBarCode.setVisibility(View.GONE);
-                                linearLayoutcontainer.setVisibility(View.GONE);
-                                customButtonSubmit.setVisibility(View.GONE);
-                                textViewtag.setVisibility(View.GONE);
-                                CustomToast.showToast(getActivity(), getResources().getString(R.string.datasavedsuccessfully));
+                                CustomToast.showToast(getActivity(), getResources().getString(R.string.something_bad_happened));
                             }
-                        } else {
-                            CustomToast.showToast(getActivity(), getResources().getString(R.string.something_bad_happened));
+
                         }
 
-                    }
+                        @Override
+                        public void onFailure(Call<TrackingStatus> call, Throwable t) {
+                            CustomProgress.endProgress();
 
-                    @Override
-                    public void onFailure(Call<TrackingStatus> call, Throwable t) {
-                        CustomProgress.endProgress();
+                        }
+                    });
+                } else {
+                    Upadte_tag upadte_tag = new Upadte_tag(userId, textViewLocation.getText().toString(), textViewProjectId.getText().toString(), textViewAseetId.getText().toString(), editTextUpdatedBarCode.getText().toString());
+                    SaveUpdateTagOffline(upadte_tag);
+                }
 
-                    }
-                });
+
                 linearLayoutBaseContainer.setAlpha((float) 0.40);
                 editTextUpdatedBarCode.setVisibility(View.VISIBLE);
                 customButtonSubmit.setVisibility(View.VISIBLE);
@@ -313,6 +361,23 @@ public class TagUpdatedFragment extends Fragment {
 
         // Showing Alert Message
         alertDialog.show();
+    }
+
+    List<Upadte_tag> upadte_tagsList = new ArrayList<>();
+
+    private void SaveUpdateTagOffline(Upadte_tag upadte_tag) {
+        upadte_tagsList.add(upadte_tag);
+        String updateTagJson = new Gson().toJson(upadte_tagsList);
+        Preferance.saveUpdateTagList(getActivity(), updateTagJson);
+        enableAllViews();
+        linearLayoutBaseContainer.setAlpha((float) 1);
+        editTextUpdatedBarCode.setVisibility(View.GONE);
+        linearLayoutcontainer.setVisibility(View.GONE);
+        customButtonSubmit.setVisibility(View.GONE);
+        textViewtag.setVisibility(View.GONE);
+        CustomToast.showToast(getActivity(), getResources().getString(R.string.datasavedsuccessfully));
+
+
     }
 
     private void callUpdateTagService() {

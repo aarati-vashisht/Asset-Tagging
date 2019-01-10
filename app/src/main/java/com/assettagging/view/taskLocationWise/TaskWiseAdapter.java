@@ -14,6 +14,7 @@ import com.assettagging.controller.Constants;
 import com.assettagging.model.tasklocationwise.ScheduleLocationTask;
 import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
 
+import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
@@ -21,6 +22,7 @@ import butterknife.ButterKnife;
 
 public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyViewHolder> {
 
+    private final HashSet<ScheduleLocationTask> locationWiseTasksHashSet;
     private List<ScheduleLocationTask> locationWiseTasks;
     private Activity activity;
     String location;
@@ -29,6 +31,9 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
         this.locationWiseTasks = locationWiseTasks;
         this.activity = activity;
         this.location = location;
+        locationWiseTasksHashSet = new HashSet<>(this.locationWiseTasks);
+        this.locationWiseTasks.clear();
+        this.locationWiseTasks.addAll(locationWiseTasksHashSet);
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -60,14 +65,20 @@ public class TaskWiseAdapter extends RecyclerView.Adapter<TaskWiseAdapter.MyView
         holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
 //        holder.textViewStartTime.setText(locationWiseTasks.get(position).getSTARTTIME());
 //        holder.textViewEndTime.setText(locationWiseTasks.get(position).getSTARTTIME());
+
         if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("Inspection")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection));
-        }else if(locationWiseTasks.get(position).getACTIVITYTYPE().equals("tagging")) {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.inspection, null));
+        } else if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("Movement")) {
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement, null));
+            holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
+        } else if (locationWiseTasks.get(position).getACTIVITYTYPE().equals("tagging")) {
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon, null));
             holder.textViewActivityType.setText("Tagging");
         } else {
-            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.movement));
+            holder.linearLayoutRow.setBackground(activity.getResources().getDrawable(R.mipmap.tagging_icon, null));
+            holder.textViewActivityType.setText(locationWiseTasks.get(position).getACTIVITYTYPE());
         }
+
         holder.linearLayoutRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

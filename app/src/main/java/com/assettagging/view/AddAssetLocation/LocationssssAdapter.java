@@ -11,10 +11,12 @@ import android.widget.TextView;
 import com.assettagging.R;
 import com.assettagging.model.user_tracking.Location;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class LocationssssAdapter extends ArrayAdapter<Location> {
     private final LayoutInflater mInflater;
+    private final HashSet<Location> locationsHashSet;
     public List<Location> locations;
     private Activity activity;
     String string;
@@ -27,13 +29,15 @@ public class LocationssssAdapter extends ArrayAdapter<Location> {
         this.activity = activity;
         mResources = row_add_assets;
         mInflater = LayoutInflater.from(activity);
-    }
+        locationsHashSet = new HashSet<>(this.locations);
+        this.locations.clear();
+        this.locations.addAll(locationsHashSet);}
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         TextView label = new TextView(activity);
         label.setTextColor(Color.BLACK);
-        label.setText(locations.get(position).getLocationName());
+        label.setText(locations.get(position).getName());
         return label;
     }
 
@@ -67,7 +71,7 @@ public class LocationssssAdapter extends ArrayAdapter<Location> {
 
         Location location = locations.get(position);
         textViewNameTitle.setText(activity.getResources().getString(R.string.locationid));
-        textViewName.setText(location.getLocationName());
+        textViewName.setText(location.getName());
 
         return convertView;
     }

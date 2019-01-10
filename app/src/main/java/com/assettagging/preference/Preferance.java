@@ -3,8 +3,12 @@ package com.assettagging.preference;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
 
 import com.assettagging.controller.Constants;
+import com.assettagging.model.asset_detai.SaveAssets;
+import com.assettagging.view.assetdisposer.existing.AddAssetDetailActivity;
+import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
 
 public class Preferance {
     private static String SHARED_PREF_NAME = "ASSET_TAGGING_PREF";
@@ -14,7 +18,10 @@ public class Preferance {
     private static String SHARED_PREF_NAME_THEME = "THEME";
     private static String EMP_ID = "EMP_ID";
     public static String ALL_DATA = "ALL_DATA";
-    private static String USER_LIST="USER_LIST";
+    private static String USER_LIST = "USER_LIST";
+    private static String CHECKED_LIST = "CHECKED_LIST";
+    private static String UPDATE_TAG_LIST = "UPDATE_TAG_LIST";
+    private static String ASSETS_LIST = "ASSETS_LIST";
 
 
     public static boolean saveUserName(Activity activity, String userName) {
@@ -59,7 +66,9 @@ public class Preferance {
 
     public static void clearPreference(Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferencesTheme = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
         sharedPreferences.edit().clear().apply();
+        sharedPreferencesTheme.edit().clear().apply();
     }
 
     public static boolean saveActionCount(Activity activity, String actionCounnt) {
@@ -116,4 +125,42 @@ public class Preferance {
         return sharedPreferences.getString(USER_LIST, "");
     }
 
+    public static boolean saveCheckdedList(Activity activity, String checkedJson) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CHECKED_LIST, checkedJson);
+        editor.apply();
+        return true;
+    }
+
+    public static String getCheckdedList(Context activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(CHECKED_LIST, "");
+    }
+
+    public static boolean saveUpdateTagList(Activity activity, String updateTagJson) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(UPDATE_TAG_LIST, updateTagJson);
+        editor.apply();
+        return true;
+    }
+
+    public static String getUpdateTagList(Context activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(UPDATE_TAG_LIST, "");
+    }
+
+    public static boolean saveAddDisposalAssetslist(Activity activity, String saveAssets) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(ASSETS_LIST, saveAssets);
+        editor.apply();
+        return true;
+    }
+
+    public static String getAddDisposalAssetslist(Context activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(SHARED_PREF_NAME_THEME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(ASSETS_LIST, "");
+    }
 }

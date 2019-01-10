@@ -2,7 +2,7 @@ package com.assettagging.view.navigation;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -15,7 +15,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,10 +29,10 @@ import android.widget.TextView;
 import com.assettagging.MyApplication;
 import com.assettagging.R;
 import com.assettagging.controller.CheckInternetConnection;
-import com.assettagging.controller.Constants;
 import com.assettagging.controller.DataBaseHelper;
 import com.assettagging.model.all_data.ActvityCount;
 import com.assettagging.model.all_data.AllData;
+import com.assettagging.model.all_data.GetAllData_USer;
 import com.assettagging.model.login.ChangePassword;
 import com.assettagging.model.login.UserChangePass;
 import com.assettagging.model.schedule.ScheduleData;
@@ -43,37 +42,53 @@ import com.assettagging.model.schedule_detail.ScheduleDetail_;
 import com.assettagging.model.schedule_detail.UserScannedList;
 import com.assettagging.preference.Preferance;
 import com.assettagging.view.BaseActivity;
-import com.assettagging.view.assetdisposer.CompletedAssetsFragment;
-import com.assettagging.view.assetdisposer.YetToSubmitDisposerFragment;
-import com.assettagging.view.assetdisposer.CreatedAssetsFragment;
 import com.assettagging.view.assetdisposer.DisposerFragmnet;
+import com.assettagging.view.assetdisposer.completed.CompletedAssetsFragment;
+import com.assettagging.view.assetdisposer.existing.ExistingAssetsFragment;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerFragment;
 import com.assettagging.view.custom_control.CustomDialogForMessages;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.custom_control.CustomToast;
-import com.assettagging.view.locationwise.LocationWiseActivity;
-import com.assettagging.view.login.LoginActivity;
 import com.assettagging.view.dashboard.DashBoardFragment;
+import com.assettagging.view.login.LoginActivity;
 import com.assettagging.view.schedule.ScheduleFragmnet;
+import com.assettagging.view.schedule.upcoming.UpcomingFragment;
 import com.assettagging.view.schedule_detail.ScheduleDetailActivity;
 import com.assettagging.view.tag_update.TagUpdatedFragment;
-import com.assettagging.view.taskLocationWise.TaskWiseActivity;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionItemTarget;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
 
 public class NavigationActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -99,9 +114,10 @@ public class NavigationActivity extends BaseActivity
     public static Handler handler = new Handler();
     static NavigationActivity instance;
     private LinearLayout linearLayoutContainer;
-    public static MenuItem menuitem;
-    public static MenuItem menuitemfilter;
+    public static MenuItem menuitem, menuitemfilter, action_LoadMore;
     private String UserId;
+    private GuideView.Builder builder;
+    private GuideView mGuideView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,26 +141,26 @@ public class NavigationActivity extends BaseActivity
         } else {
             getDataFromDatabase();
         }
-
-        onRefreshListener();
+        if (TagUpdatedFragment.instance == null) {
+            onRefreshListener();
+        } else {
+            pullToRefresh.setRefreshing(false);
+        }
     }
 
+    Gson gson = new Gson();
+
     public void getDataFromDatabase() {
-        Gson gson = new Gson();
         String json = Preferance.getAllDAta(NavigationActivity.this);
-        AllData allData = gson.fromJson(json, AllData.class);
-        for (int i = 0; i < allData.getOngoingSchedule().size(); i++) {
-            if (allData.getOngoingSchedule().get(0).getEmpId().equals(UserId)) {
-            }
+        if (json.trim().length() > 0) {
+            AllData allData = gson.fromJson(json, AllData.class);
+            scheduleData.setActvityCount(allData.getActvityCount());
+            scheduleData.setUpcomingSchedule(allData.getUpcomingSchedule());
+            scheduleData.setOngoingSchedule(allData.getOngoingSchedule());
+            setupViewPager(scheduleData);
+        } else {
+            CustomToast.showToast(this, getString(R.string.no_internet_connection));
         }
-        for (int i = 0; i < allData.getUpcomingSchedule().size(); i++) {
-            if (allData.getUpcomingSchedule().get(0).getEmpId().equals(UserId)) {
-            }
-        }
-        scheduleData.setActvityCount(allData.getActvityCount());
-        scheduleData.setUpcomingSchedule(allData.getUpcomingSchedule());
-        scheduleData.setOngoingSchedule(allData.getOngoingSchedule());
-        setupViewPager(scheduleData);
     }
 
     public static NavigationActivity getInstance() {
@@ -207,8 +223,8 @@ public class NavigationActivity extends BaseActivity
                     if (DashBoardFragment.getInstance() != null || ScheduleFragmnet.getInstance() != null)
                         if (ScheduleDetailActivity.getInstance() == null)
                             getScheduleData();
-                    if (CreatedAssetsFragment.getInstance() != null) {
-                        CreatedAssetsFragment.getInstance().getAssetDisposalData();
+                    if (ExistingAssetsFragment.getInstance() != null) {
+                        ExistingAssetsFragment.getInstance().getAssetDisposalData();
                     }
                 } else {
                 }
@@ -232,7 +248,6 @@ public class NavigationActivity extends BaseActivity
                     CustomProgress.endProgress();
                 }
                 setScheduleResponse(response.body());
-
             }
 
             @Override
@@ -240,7 +255,6 @@ public class NavigationActivity extends BaseActivity
                 if (!firstTime) {
                     CustomProgress.endProgress();
                 }
-
                 setScheduleResponse(null);
             }
         });
@@ -253,7 +267,17 @@ public class NavigationActivity extends BaseActivity
                 CustomDialogForMessages.showMessageAlert(NavigationActivity.this, getString(R.string.failure), getString(R.string.something_bad_happened));
             }
         } else {
-            Gson gson = new Gson();
+            if (!firstTime) {
+                String json1 = Preferance.getAllDAta(NavigationActivity.this);
+                if (json1.trim().length() > 0) {
+                    AllData allData = gson.fromJson(json1, AllData.class);
+                    if (allData == null) {
+                        showInfoView();
+                    }
+                } else {
+                    showInfoView();
+                }
+            }
             Type type = new TypeToken<List<ActvityCount>>() {
             }.getType();
             String json = gson.toJson(body.getActvityCount(), type);
@@ -348,9 +372,9 @@ public class NavigationActivity extends BaseActivity
             }
         });
         if (Preferance.getTheme(getApplicationContext()).equals("ORANGE")) {
-            linearLayoutNav.setBackground(getResources().getDrawable(R.drawable.nav_header_drawable));
+            linearLayoutNav.setBackground(getResources().getDrawable(R.drawable.nav_header_drawable, null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
-            linearLayoutNav.setBackground(getResources().getDrawable(R.drawable.nav_header_drawable_blue));
+            linearLayoutNav.setBackground(getResources().getDrawable(R.drawable.nav_header_drawable_blue, null));
         }
         navigationView.setNavigationItemSelectedListener(this);
         //  textViewName.setText(Preferance.getUserName(this));
@@ -391,20 +415,61 @@ public class NavigationActivity extends BaseActivity
 
     }
 
+    Menu menus;
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        menus = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.setting_menu, menu);
         menuitem = menu.findItem(R.id.action_add_new);
         menuitemfilter = menu.findItem(R.id.action_filter);
+        action_LoadMore = menu.findItem(R.id.action_LoadMore);
+        if (CheckInternetConnection.isInternetConnected(NavigationActivity.this)) {
+            action_LoadMore.setVisible(true);
+        } else {
+            action_LoadMore.setVisible(false);
+        }
+
 
         menuitemfilter.setVisible(false);
         menuitem.setVisible(false);
+
         return true;
+    }
+
+    private void showInfoView() {
+
+        if (toolbar.getMenu().size() == 0) {
+            return;
+        }
+        MenuItem item = toolbar.getMenu().getItem(0);
+        try {
+            // ViewTarget navigationButtonViewTarget = navigationButtonViewTarget(toolbar); use this for back or up button
+            new ShowcaseView.Builder(NavigationActivity.this)
+                    .withMaterialShowcase()
+                    .setTarget(new ViewTarget(item.getItemId(), NavigationActivity.this))
+                    .setContentTitle("Click \"Load More\" button to load data for Offline use")
+                    .hideOnTouchOutside().setStyle(R.style.CustomShowcaseTheme).build()
+                    .show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    MenuItem items;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.action_logout:
                 Preferance.clearPreference(this);
@@ -419,8 +484,106 @@ public class NavigationActivity extends BaseActivity
                     CustomToast.showToast(this, getString(R.string.if_you_want_to_change_pass_connect_net));
                 }
                 return true;
+            case R.id.action_LoadMore:
+                if (CheckInternetConnection.isInternetConnected(getApplicationContext())) {
+                    getAllData();
+                } else {
+                    CustomToast.showToast(this, getString(R.string.no_internet_connection));
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void getAllData() {
+        CustomProgress.startProgress(NavigationActivity.this);
+        String userId = Preferance.getUserId(this);
+        GetAllData_USer getAllData_uSer = new GetAllData_USer(userId);
+        Call<AllData> call = MyApplication.apiInterface.getAllData(getAllData_uSer);
+        call.enqueue(new Callback<AllData>() {
+            @Override
+            public void onResponse(Call<AllData> call, Response<AllData> response) {
+                setAllDataResponse(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<AllData> call, Throwable t) {
+                setAllDataResponse(null);
+
+            }
+        });
+    }
+
+    private void setAllDataResponse(AllData body) {
+        CustomProgress.endProgress();
+        if (body != null) {
+            if (body.getStatus().equals("success")) {
+                String allDataJson = gson.toJson(body);
+                Preferance.saveAllDAta(this, allDataJson);
+                for (int i = 0; i < body.getScheduleDetail().size(); i++) {
+                    saveImagesToDevice(body.getScheduleDetail().get(i).getImagePath(), body.getScheduleDetail().get(i).getASSETID());
+                }
+            } else {
+                CustomToast.showToast(this, getString(R.string.something_bad_happened));
+            }
+        } else {
+            CustomToast.showToast(this, getString(R.string.something_bad_happened));
+        }
+
+    }
+
+    private void saveImagesToDevice(String body, String assetid) {
+        try {
+//                http://192.168.1.23:810/api/DownloadMandate/PhysicalMandate
+            URL url = new URL(body);//1
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(30000);
+            conn.setConnectTimeout(30000);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            try {
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                writer.flush();
+                writer.close();
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            String msg = conn.getResponseMessage();
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+//                        For PDF Download
+
+                try {
+                    int fileLength = conn.getContentLength();
+                    InputStream input = new BufferedInputStream(conn.getInputStream());
+                    OutputStream output = new FileOutputStream("/sdcard/Download/" + assetid + ".jpg");
+
+                    byte data[] = new byte[1024];
+                    long total = 0;
+                    int count;
+                    while ((count = input.read(data)) != -1) {
+                        total += count;
+                        // publishing the progress....
+                        Bundle resultData = new Bundle();
+                        resultData.putInt("progress", (int) (total * 100 / fileLength));
+                        output.write(data, 0, count);
+                    }
+
+                    output.flush();
+                    output.close();
+                    input.close();
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -444,16 +607,16 @@ public class NavigationActivity extends BaseActivity
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background, null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue, null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue, null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -528,42 +691,41 @@ public class NavigationActivity extends BaseActivity
             ScheduleFragmnet.instance = null;
             DisposerFragmnet.instance = null;
             YetToSubmitDisposerFragment.instance = null;
-            CreatedAssetsFragment.instance = null;
+            ExistingAssetsFragment.instance = null;
             CompletedAssetsFragment.instance = null;
             menuitem.setVisible(false);
+            pullToRefresh.setEnabled(true);
+            action_LoadMore.setVisible(true);
         } else if (id == R.id.nav_Schedules) {
             showFragment(new ScheduleFragmnet(), getString(R.string.daily_schedule));
             DisposerFragmnet.instance = null;
             DashBoardFragment.instance = null;
             YetToSubmitDisposerFragment.instance = null;
-            CreatedAssetsFragment.instance = null;
+            ExistingAssetsFragment.instance = null;
             CompletedAssetsFragment.instance = null;
             menuitem.setVisible(false);
-        }
-// else if (id == R.id.nav_theme) {
-//            showFragment(add_new ThemesFragment(), getString(R.string.theme));
-//            DashBoardFragment.instance = null;
-//            ScheduleFragmnet.instance = null;
-//            DisposerFragmnet.instance = null;
-//            YetToSubmitDisposerFragment.instance = null;
-//            CreatedAssetsFragment.instance = null;
-//            menuitem.setVisible(false);
-//        }
-        else if (id == R.id.nav_disposer) {
+            pullToRefresh.setEnabled(true);
+            action_LoadMore.setVisible(false);
+        } else if (id == R.id.nav_disposer) {
             showFragment(new DisposerFragmnet(), getString(R.string.assetDisposer));
             DashBoardFragment.instance = null;
             ScheduleFragmnet.instance = null;
             menuitem.setVisible(true);
+            pullToRefresh.setEnabled(true);
+            action_LoadMore.setVisible(false);
         } else if (id == R.id.tag_update) {
             showFragment(new TagUpdatedFragment(), getString(R.string.tagupdate));
             DashBoardFragment.instance = null;
             ScheduleFragmnet.instance = null;
             DisposerFragmnet.instance = null;
+            pullToRefresh.setRefreshing(false);
+            pullToRefresh.setEnabled(false);
             YetToSubmitDisposerFragment.instance = null;
-            CreatedAssetsFragment.instance = null;
+            ExistingAssetsFragment.instance = null;
             CompletedAssetsFragment.instance = null;
             menuitem.setVisible(false);
             menuitemfilter.setVisible(false);
+            action_LoadMore.setVisible(false);
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;

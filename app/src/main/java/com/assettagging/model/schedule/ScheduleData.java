@@ -26,7 +26,7 @@ public class ScheduleData {
     private String status;
     @SerializedName("ActvityCount")
     @Expose
-    private List<com.assettagging.model.all_data.ActvityCount> ActvityCount =  new ArrayList<>();
+    private List<com.assettagging.model.all_data.ActvityCount> ActvityCount;
 
     public List<ActvityCount> getActvityCount() {
         return ActvityCount;

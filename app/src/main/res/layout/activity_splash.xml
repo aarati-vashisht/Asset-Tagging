@@ -30,7 +30,7 @@
         android:maxHeight="10dip"
         android:minHeight="10dip"
         android:progress="0"
-        android:progressDrawable="@drawable/cutom_progress_drawable"
+        android:progressDrawable="@drawable/custom_round_progress"
         android:visibility="gone" />
 
     <ProgressBar

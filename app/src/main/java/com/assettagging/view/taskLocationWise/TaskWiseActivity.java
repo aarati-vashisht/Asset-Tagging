@@ -39,6 +39,7 @@ import com.assettagging.view.custom_control.CustomDialogForMessages;
 import com.assettagging.view.custom_control.CustomProgress;
 import com.assettagging.view.custom_control.CustomToast;
 import com.assettagging.view.login.LoginActivity;
+import com.assettagging.view.navigation.NavigationActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -57,7 +58,7 @@ import retrofit2.Response;
 
 public class TaskWiseActivity extends BaseActivity {
     public static TaskWiseActivity instance;
-    private String ScheduleId, Location, EmpId = "";
+    private String ScheduleId, Location, EmpId,LocationName = "";
     @BindView(R.id.recyclerViewData)
     RecyclerView recyclerViewData;
     @BindView(R.id.textViewNoData)
@@ -66,6 +67,7 @@ public class TaskWiseActivity extends BaseActivity {
     SwipeRefreshLayout pullToRefresh;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
     private Handler handler = new Handler();
     private Dialog dialogChangePassword;
     private Call<TaskLocationWise> call;
@@ -90,6 +92,7 @@ public class TaskWiseActivity extends BaseActivity {
         } else {
             getTaskLocationWiseDataOffline();
         }
+        NavigationActivity.getInstance().action_LoadMore.setVisible(false);
         onRefreshListener();
     }
 
@@ -98,7 +101,7 @@ public class TaskWiseActivity extends BaseActivity {
         String json = Preferance.getAllDAta(TaskWiseActivity.this);
         AllData allData = gson.fromJson(json, AllData.class);
         for (int i = 0; i < allData.getScheduleLocationTask().size(); i++) {
-            if (allData.getScheduleLocationTask().get(i).getEMPID().equals(EmpId) && allData.getScheduleLocationTask().get(i).getSCHEDULEID().equals(ScheduleId) && allData.getScheduleLocationTask().get(i).getLOCATION().equals(Location)) {
+            if ( allData.getScheduleLocationTask().get(i).getSCHEDULEID().equals(ScheduleId) && allData.getScheduleLocationTask().get(i).getLOCATION().equals(Location)) {
                 tasklist.add(allData.getScheduleLocationTask().get(i));
             }
         }
@@ -197,7 +200,7 @@ public class TaskWiseActivity extends BaseActivity {
 
     private void setActionBarData() {
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(Location);
+        getSupportActionBar().setTitle(LocationName);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -205,6 +208,7 @@ public class TaskWiseActivity extends BaseActivity {
     private void getIntentData() {
         ScheduleId = getIntent().getStringExtra(Constants.SCHEDULE_ID);
         Location = getIntent().getStringExtra(Constants.LOCATION);
+        LocationName = getIntent().getStringExtra(Constants.LOCATION_Name);
         EmpId = getIntent().getStringExtra(Constants.EmpID);
     }
 
@@ -259,7 +263,8 @@ public class TaskWiseActivity extends BaseActivity {
         menuitemfilter = menu.findItem(R.id.action_filter);
         menuitem.setVisible(false);
         menuitemfilter.setVisible(false);
-        return true;
+        MenuItem action_LoadMore = menu.findItem(R.id.action_LoadMore);
+        action_LoadMore.setVisible(false);   return true;
     }
 
 
@@ -312,16 +317,16 @@ public class TaskWiseActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override

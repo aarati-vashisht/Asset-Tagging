@@ -3,8 +3,8 @@ package com.assettagging.model.schedule;
 
 import android.support.annotation.NonNull;
 
-import com.assettagging.view.assetdisposer.YetToSubmitDisposerAdapter;
-import com.assettagging.view.assetdisposer.YetToSubmitDisposerFragment;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerAdapter;
+import com.assettagging.view.assetdisposer.yet_to_submit.YetToSubmitDisposerFragment;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

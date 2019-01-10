@@ -100,7 +100,7 @@ public class LocationWiseActivity extends BaseActivity {
         String json = Preferance.getAllDAta(LocationWiseActivity.this);
         AllData allData = gson.fromJson(json, AllData.class);
         for (int i = 0; i < allData.getScheduleLocation().size(); i++) {
-            if (allData.getScheduleLocation().get(i).getEMPID().equals(EmpID) && allData.getScheduleLocation().get(i).getSCHEDULEID().equals(ScheduleId)) {
+            if (allData.getScheduleLocation().get(i).getSCHEDULEID().equals(ScheduleId)) {
                 scheduleLocationList.add(allData.getScheduleLocation().get(i));
             }
         }
@@ -301,7 +301,7 @@ public class LocationWiseActivity extends BaseActivity {
         });
     }
 
-    public static MenuItem menuitemfilter;
+    public static MenuItem menuitemfilter,action_LoadMore;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -309,6 +309,8 @@ public class LocationWiseActivity extends BaseActivity {
         inflater.inflate(R.menu.setting_menu, menu);
         menuitem = menu.findItem(R.id.action_add_new);
         menuitemfilter = menu.findItem(R.id.action_filter);
+        action_LoadMore = menu.findItem(R.id.action_LoadMore);
+        action_LoadMore.setVisible(false);
         menuitem.setVisible(false);
         menuitemfilter.setVisible(false);
         return true;
@@ -366,16 +368,16 @@ public class LocationWiseActivity extends BaseActivity {
         tvChangepass = dialogChangePassword.findViewById(R.id.tv_changepassword);
         if (Preferance.getTheme(this).equals("ORANGE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background,null));
         } else if (Preferance.getTheme(getApplicationContext()).equals("BLUE")) {
             linearLayoutContainer.setBackgroundColor(getResources().getColor(R.color.colorAccentBlue));
-            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue));
-            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue));
+            edtoldpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtnewpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            edtconfirmpassword.setBackground(getResources().getDrawable(R.drawable.edittext_background_not_round_blue,null));
+            tvChangepass.setBackground(getResources().getDrawable(R.drawable.button_background_blue,null));
         }
         tvChangepass.setOnClickListener(new View.OnClickListener() {
             @Override

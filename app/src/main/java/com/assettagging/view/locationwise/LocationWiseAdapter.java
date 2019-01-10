@@ -14,6 +14,7 @@ import com.assettagging.view.taskLocationWise.TaskWiseActivity;
 import com.assettagging.controller.Constants;
 import com.assettagging.model.locationwise.ScheduleLocation;
 
+import java.util.HashSet;
 import java.util.List;
 
 import butterknife.BindView;
@@ -21,13 +22,16 @@ import butterknife.ButterKnife;
 
 public class LocationWiseAdapter extends RecyclerView.Adapter<LocationWiseAdapter.MyViewHolder> {
 
+    private final HashSet<ScheduleLocation> locationListHashSet;
     private List<ScheduleLocation> locationList;
     private Activity activity;
 
     public LocationWiseAdapter(Activity activity, List<ScheduleLocation> locationList) {
         this.locationList = locationList;
         this.activity = activity;
-    }
+        locationListHashSet = new HashSet<>(this.locationList);
+        this.locationList.clear();
+        this.locationList.addAll(locationListHashSet);  }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -63,7 +67,8 @@ public class LocationWiseAdapter extends RecyclerView.Adapter<LocationWiseAdapte
         holder.linearLayoutRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activity.startActivity(new Intent(activity, TaskWiseActivity.class).putExtra(Constants.SCHEDULE_ID, locationList.get(position).getSCHEDULEID()).putExtra(Constants.LOCATION, locationList.get(position).getLocation()).putExtra(Constants.EmpID, locationList.get(position).getEMPID()));
+
+                activity.startActivity(new Intent(activity, TaskWiseActivity.class).putExtra(Constants.LOCATION_Name, locationList.get(position).getLocationName()).putExtra(Constants.SCHEDULE_ID, locationList.get(position).getSCHEDULEID()).putExtra(Constants.LOCATION, locationList.get(position).getLocation()).putExtra(Constants.EmpID, locationList.get(position).getEMPID()));
                 activity.overridePendingTransition(0, 0);
             }
         });
